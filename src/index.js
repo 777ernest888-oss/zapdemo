@@ -13,11 +13,11 @@ app.get('/health', (req, res) => res.json({ ok: true, time: new Date().toISOStri
 app.listen(process.env.PORT || 3000, () => console.log('API_UP'));
 
 if (process.env.BOT_TOKEN) {
-  const bot = new Telegraf(process.env.BOT_TOKEN);
-  bot.start((ctx) => ctx.reply('Автозапчасти', Markup.inlineKeyboard([[
-    Markup.button.webApp('Каталог', process.env.MINI_APP_URL || 'https://zap.prostors.ru/')
-  ]])));
-  bot.launch().then(() => console.log('BOT_UP')).catch(e => console.error('BOT_FAIL', e.message));
+  const bot = new Telegraf(process.env.BOT_TOKEN);
+  bot.start((ctx) => ctx.reply('Добро пожаловать!', Markup.inlineKeyboard([[
+    Markup.button.webApp('🚗 Открыть приложение', process.env.MINI_APP_URL || 'https://zap.prostors.ru/')
+  ]])));
+  bot.launch().then(() => console.log('BOT_UP')).catch(e => console.error('BOT_FAIL', e.message));
 } else {
-  console.warn('BOT_TOKEN empty - bot skipped');
+  console.warn('BOT_TOKEN empty - bot skipped');
 }

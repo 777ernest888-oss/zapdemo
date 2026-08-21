@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -6,25 +6,44 @@
 <title>Автозапчасти</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-body{font-family:system-ui;margin:0;padding:16px;background:#f5f5f5}
-.item{background:#fff;border-radius:8px;padding:12px;margin:8px 0}
-.price{color:#1a7f3c;font-weight:700}
-input{width:100%;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:#f5f5f5}
+.hd{position:fixed;top:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;justify-content:space-between;align-items:center;z-index:10}
+.hd b{font-size:18px}
+.hd button{border:0;background:#667eea;color:#fff;font-size:18px;padding:6px 12px;border-radius:8px}
+.hero{margin-top:56px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:24px 16px}
+.hero img{width:100%;max-width:420px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.hero h1{font-size:26px;margin:16px 0 8px}
+.hero p{opacity:.9;margin:0 0 20px}
+.btn{display:inline-block;background:#fff;color:#667eea;padding:14px 32px;border-radius:10px;font-weight:600;text-decoration:none}
+.ft{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
+.ft div{background:#fff;border-radius:12px;padding:14px;text-align:center}
+.ft b{display:block;margin-bottom:4px}
+.ft span{font-size:13px;color:#666}
 </style>
 </head>
 <body>
-<h1>Автозапчасти</h1>
-<input id="q" type="search" placeholder="Артикул или название">
-<div id="list"></div>
+<div class="hd"><b>🚗 Автозапчасти</b><button onclick="menu()">☰</button></div>
+<div class="hero">
+<img src="images/hero.jpg" alt="">
+<h1>Качественные автозапчасти</h1>
+<p>Подберём и доставим для вашего авто</p>
+<a class="btn" href="catalog.html">Открыть каталог</a>
+</div>
+<div class="ft">
+<div><b>📦</b><span>Большой выбор</span></div>
+<div><b>🚚</b><span>Быстрая доставка</span></div>
+<div><b>💰</b><span>Низкие цены</span></div>
+<div><b>🔧</b><span>Помощь в подборе</span></div>
+</div>
 <script>
-const list=document.getElementById('list'),q=document.getElementById('q');let t;
-q.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(load,300)});
-async function load(){
- const r=await fetch('/api/products?q='+encodeURIComponent(q.value)+'&limit=20');
- const d=await r.json();
- list.innerHTML=d.items.map(p=>'<div class="item"><b>'+p.article+'</b> — '+p.name+'<div class="price">'+p.price+' ₽ · наличие: '+p.stock+'</div></div>').join('')||'<p>Пока пусто</p>';
+function menu(){
+var m=prompt('Меню: 1-Каталог 2-Контакты 3-Админка');
+if(m=='1')location='catalog.html';
+if(m=='2')alert('Telegram: @ernest_812');
+if(m=='3')location='admin.html';
 }
-load();
+Telegram.WebApp.ready();
+Telegram.WebApp.expand();
 </script>
 </body>
 </html>
