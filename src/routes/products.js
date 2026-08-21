@@ -1,40 +1,98 @@
 const express = require('express');
-const db = require('../db');
 const router = express.Router();
-function num(v) {
-  if (v === null || v === undefined || v === '') return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-}
+const Database = require('better-sqlite3');
+const path = require('path');
+
+const db = new Database(process.env.DB_PATH || path.join(__dirname, '../data/parts.db'));
+
+// GET /api/products?q=...&category=...&brand=...&limit=...&offset=...
 router.get('/', (req, res) => {
   try {
-    const q = (req.query.q || '').trim();
-    const where = []; const params = [];
-    if (q) { where.push('(article LIKE ? OR name LIKE ?)'); params.push('%' + q + '%', '%' + q + '%'); }
-    if (req.query.category) { where.push('category = ?'); params.push(req.query.category); }
-    if (req.query.brand) { where.push('brand = ?'); params.push(req.query.brand); }
-    const pmin = num(req.query.price_min); const pmax = num(req.query.price_max);
-    if (pmin !== null) { where.push('price >= ?'); params.push(pmin); }
-    if (pmax !== null) { where.push('price <= ?'); params.push(pmax); }
-    const limit = Math.min(Math.max(parseInt(req.query.limit) || 24, 1), 100);
-    const offset = Math.max(parseInt(req.query.offset) || 0, 0);
-    const w = where.length ? 'WHERE ' + where.join(' AND ') : '';
-    const total = db.prepare('SELECT COUNT(*) AS c FROM products ' + w).get(...params).c;
-    const items = db.prepare('SELECT id, article, name, category, brand, price, stock, photo_url FROM products ' + w + ' ORDER BY id DESC LIMIT ? OFFSET ?').all(...params, limit, offset);
-    res.json({ total, limit, offset, items });
-  } catch (e) { res.status(500).json({ error: 'db_error', message: e.message }); }
+    const { q, category, brand, limit = 20, offset = 0 } = req.query;
+   
+    let sql = 'SELECT * FROM products WHERE 1=1';
+    let params = [];
+   
+    // Поиск по артикулу или названию
+    if (q && q.trim()) {
+      sql += ' AND (article LIKE ? OR name LIKE ?)';
+      const searchPattern = `%${q.trim()}%`;
+      params.push(searchPattern, searchPattern);
+    }
+   
+    // Фильтр по категории
+    if (category && category.trim()) {
+      sql += ' AND category = ?';
+      params.push(category.trim());
+    }
+   
+    // Фильтр по бренду
+    if (brand && brand.trim()) {
+      sql += ' AND brand = ?';
+      params.push(brand.trim());
+    }
+   
+    sql += ' ORDER BY article LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), parseInt(offset));
+   
+    const stmt = db.prepare(sql);
+    const items = stmt.all(...params);
+   
+    // Получаем общее количество для пагинации
+    let countSql = 'SELECT COUNT(*) as total FROM products WHERE 1=1';
+    let countParams = [];
+   
+    if (q && q.trim()) {
+      countSql += ' AND (article LIKE ? OR name LIKE ?)';
+      const searchPattern = `%${q.trim()}%`;
+      countParams.push(searchPattern, searchPattern);
+    }
+   
+    if (category && category.trim()) {
+      countSql += ' AND category = ?';
+      countParams.push(category.trim());
+    }
+   
+    if (brand && brand.trim()) {
+      countSql += ' AND brand = ?';
+      countParams.push(brand.trim());
+    }
+   
+    const totalStmt = db.prepare(countSql);
+    const { total } = totalStmt.get(...countParams);
+   
+    res.json({
+      items,
+      total: total || 0,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    console.error('[API Error]', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
-router.get('/facets', (req, res) => {
-  const categories = db.prepare('SELECT DISTINCT category FROM products WHERE category IS NOT NULL ORDER BY category').all().map(r => r.category);
-  const brands = db.prepare('SELECT DISTINCT brand FROM products WHERE brand IS NOT NULL ORDER BY brand').all().map(r => r.brand);
-  const price = db.prepare('SELECT MIN(price) AS min, MAX(price) AS max FROM products').get();
-  res.json({ categories, brands, price_min: price.min, price_max: price.max });
+
+// GET /api/products/categories - список категорий
+router.get('/categories', (req, res) => {
+  try {
+    const categories = db.prepare('SELECT DISTINCT category FROM products WHERE category IS NOT NULL ORDER BY category').all();
+    res.json(categories.map(c => c.category));
+  } catch (error) {
+    console.error('[API Error]', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
-router.get('/:id', (req, res) => {
-  const id = num(req.params.id);
-  if (id === null) return res.status(400).json({ error: 'bad_id' });
-  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
-  if (!row) return res.status(404).json({ error: 'not_found' });
-  res.json(row);
+
+// GET /api/products/brands - список брендов
+router.get('/brands', (req, res) => {
+  try {
+    const brands = db.prepare('SELECT DISTINCT brand FROM products WHERE brand IS NOT NULL ORDER BY brand').all();
+    res.json(brands.map(b => b.brand));
+  } catch (error) {
+    console.error('[API Error]', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
-module.exports = router
+
+module.exports = router;

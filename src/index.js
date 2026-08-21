@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { Telegraf, Markup } = require('telegraf');
@@ -9,14 +9,15 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/products', products);
 app.get('/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+
 app.listen(process.env.PORT || 3000, () => console.log('API_UP'));
 
 if (process.env.BOT_TOKEN) {
   const bot = new Telegraf(process.env.BOT_TOKEN);
-  bot.start(ctx => ctx.reply('Автозапчасти', Markup.inlineKeyboard([[
+  bot.start((ctx) => ctx.reply('Автозапчасти', Markup.inlineKeyboard([[
     Markup.button.webApp('Каталог', process.env.MINI_APP_URL || 'https://zap.prostors.ru/')
   ]])));
-  bot.launch().then(() => console.log('BOT_UP'));
+  bot.launch().then(() => console.log('BOT_UP')).catch(e => console.error('BOT_FAIL', e.message));
 } else {
-  console.warn('BOT_TOKEN empty — bot skipped');
+  console.warn('BOT_TOKEN empty - bot skipped');
 }

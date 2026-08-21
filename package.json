@@ -1,12 +1,12 @@
-﻿{
-  "name": "zapdemo",
-  "private": true,
-  "main": "src/index.js",
-  "scripts": { "start": "node src/index.js" },
-  "dependencies": {
-    "better-sqlite3": "^11.10.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "telegraf": "^4.16.3"
-  }
+{
+  "name": "zapdemo",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": { "start": "node src/index.js" },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "telegraf": "^4.15.0"
+  }
 }
