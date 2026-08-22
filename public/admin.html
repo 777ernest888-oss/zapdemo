@@ -25,7 +25,7 @@ button.gray{background:#999}
 </style>
 </head>
 <body>
-<div class="nav"><a href="index.html?v=3">← Главная</a><a href="catalog.html?v=3">🛒 Каталог</a></div>
+<div class="nav"><a href="index.html?v=5">← Главная</a><a href="catalog.html?v=5">🛒 Каталог</a></div>
 <h1>⚙️ Админ-панель</h1>
 <div id="login">
 <input id="pass" type="password" placeholder="Пароль администратора">
@@ -37,6 +37,8 @@ button.gray{background:#999}
 <div>
 <button id="tabP" class="tab active" onclick="tab('p')">📦 Товары</button>
 <button id="tabR" class="tab" onclick="tab('r')">📋 Заявки</button>
+<button id="tabS" class="tab" onclick="tab('s')">⚙️ Настройки</button>
+<button class="gray" onclick="shareCatalog()">📤 Каталог</button>
 <button class="gray" onclick="logout()">Выход</button>
 </div>
 <div id="msg"></div>
@@ -52,10 +54,26 @@ button.gray{background:#999}
 <button onclick="saveProd()">Сохранить</button>
 <h2>Список товаров</h2>
 <div id="plist"></div>
+<div class="card">
+<h2>📥 Импорт Excel</h2>
+<input type="file" id="f_file" accept=".xlsx,.xls">
+<button onclick="doImport()">Импортировать</button>
+<button class="gray" onclick="dlTemplate()">Скачать шаблон</button>
+<div id="imp_rep"></div>
+</div>
 </div>
 <div id="sec-r" class="hide">
 <h2>VIN-заявки</h2>
 <div id="rlist"></div>
+</div>
+<div id="sec-s" class="hide">
+<h2>Настройки</h2>
+<input id="s_brand" placeholder="Название бренда">
+<input id="s_phone" placeholder="Телефон">
+<input id="s_contact" placeholder="Контакты (TG)">
+<input id="s_about" placeholder="О компании">
+<input id="s_pass" type="password" placeholder="Новый пароль (если сменить)">
+<button onclick="saveS()">Сохранить настройки</button>
 </div>
 </div>
 <script>
@@ -74,8 +92,11 @@ function show(){document.getElementById('login').classList.add('hide');document.
 function tab(t){
 document.getElementById('sec-p').classList.toggle('hide',t!='p');
 document.getElementById('sec-r').classList.toggle('hide',t!='r');
+document.getElementById('sec-s').classList.toggle('hide',t!='s');
 document.getElementById('tabP').classList.toggle('active',t=='p');
 document.getElementById('tabR').classList.toggle('active',t=='r');
+document.getElementById('tabS').classList.toggle('active',t=='s');
+if(t=='s')loadS();
 }
 function msg(t,ok){var m=document.getElementById('msg');m.innerHTML='<div class="'+(ok?'ok':'err')+'">'+t+'</div>';setTimeout(function(){m.innerHTML='';},3000);}
 function clearForm(){
@@ -86,7 +107,7 @@ function loadP(){
 fetch('/admin/products',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
 if(a.error){msg(a.error,false);return;}
 document.getElementById('plist').innerHTML=a.map(function(p){
-return '<div class="card"><div class="row"><b>'+p.article+'</b> — '+p.name+'</div><div class="row">'+(p.car_brand||'')+' · '+p.brand+' · '+p.price+' ₽ · налич:'+p.stock+'</div><button class="gray" onclick="editProd('+p.id+')">Ред.</button><button class="red" onclick="delProd('+p.id+')">Удалить</button></div>';
+return '<div class="card"><div class="row"><b>'+p.article+'</b> — '+p.name+'</div><div class="row">'+(p.car_brand||'')+' · '+(p.brand||'')+' · '+p.price+' ₽ · налич:'+p.stock+'</div><button class="gray" onclick="editProd('+p.id+')">Ред.</button><button class="red" onclick="delProd('+p.id+')">Удалить</button><button class="gray" onclick="copyLink(\''+p.article+'\')">🔗</button><button class="gray" onclick="shareTg(\''+p.article+'\')">📤</button></div>';
 }).join('')||'<p>Пусто</p>';
 });
 }
@@ -139,33 +160,10 @@ function delReq(id){
 if(!confirm('Удалить заявку?'))return;
 fetch('/admin/requests/'+id,{method:'DELETE',headers:hdr()}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg('Удалено',true);loadR();}});
 }
-if(PASS)show();
-</script>
-<script>
-function prodUrl(a){return 'https://zap.prostors.ru/catalog.html?v=4&article='+encodeURIComponent(a);}
+function prodUrl(a){return 'https://zap.prostors.ru/catalog.html?article='+encodeURIComponent(a);}
 function copyLink(a){var u=prodUrl(a);if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){msg('Ссылка скопирована',true);});}else{prompt('Скопируйте ссылку:',u);}}
 function shareTg(a){var u=prodUrl(a);window.open('https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Запчасть: '+a),'_blank');}
-function shareCatalog(){window.open('https://t.me/share/url?url='+encodeURIComponent('https://zap.prostors.ru/catalog.html?v=4')+'&text='+encodeURIComponent('Каталог автозапчастей'),'_blank');}
-function loadP(){
-fetch('/admin/products',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
-if(a.error){msg(a.error,false);return;}
-document.getElementById('plist').innerHTML=a.map(function(p){
-return '<div class="card"><div class="row"><b>'+p.article+'</b> — '+p.name+'</div><div class="row">'+(p.car_brand||'')+' · '+(p.brand||'')+' · '+p.price+' ₽ · налич:'+p.stock+'</div><button class="gray" onclick="editProd('+p.id+')">Ред.</button><button class="red" onclick="delProd('+p.id+')">Удалить</button><button class="gray" onclick="copyLink(\''+p.article+'\')">🔗</button><button class="gray" onclick="shareTg(\''+p.article+'\')">📤</button></div>';
-}).join('')||'<p>Пусто</p>';
-});
-}
-document.getElementById('tabR').insertAdjacentHTML('afterend','<button class="gray" onclick="shareCatalog()">📤 Каталог</button><button id="tabS" class="tab" onclick="tab(\'s\')">⚙️ Настройки</button>');
-document.getElementById('sec-r').insertAdjacentHTML('afterend','<div id="sec-s" class="hide"><h2>Настройки</h2><input id="s_brand" placeholder="Название бренда"><input id="s_phone" placeholder="Телефон"><input id="s_contact" placeholder="Контакты (TG)"><input id="s_about" placeholder="О компании"><input id="s_pass" type="password" placeholder="Новый пароль (если сменить)"><button onclick="saveS()">Сохранить настройки</button></div>');
-<script>
-function tab(t){
-document.getElementById('sec-p').classList.toggle('hide',t!='p');
-document.getElementById('sec-r').classList.toggle('hide',t!='r');
-document.getElementById('sec-s').classList.toggle('hide',t!='s');
-document.getElementById('tabP').classList.toggle('active',t=='p');
-document.getElementById('tabR').classList.toggle('active',t=='r');
-document.getElementById('tabS').classList.toggle('active',t=='s');
-if(t=='s')loadS();
-}
+function shareCatalog(){window.open('https://t.me/share/url?url='+encodeURIComponent('https://zap.prostors.ru/catalog.html?v=5')+'&text='+encodeURIComponent('Каталог автозапчастей'),'_blank');}
 function loadS(){
 fetch('/admin/settings',{headers:hdr()}).then(function(r){return r.json();}).then(function(s){
 document.getElementById('s_brand').value=s.brand_name||'';
@@ -183,6 +181,27 @@ if(d.ok){msg('Настройки сохранены',true);document.getElementBy
 else{msg(d.error||'Ошибка',false);}
 });
 }
+function doImport(){
+var f=document.getElementById('f_file').files[0];
+if(!f){msg('Выберите файл',false);return;}
+var fd=new FormData();
+fd.append('file',f);
+fetch('/admin/import-excel',{method:'POST',headers:{'x-admin-pass':PASS},body:fd}).then(function(r){return r.json();}).then(function(d){
+if(d.errors!==undefined){
+document.getElementById('imp_rep').innerHTML='<div class="ok">Вставлено: '+d.inserted+' · Обновлено: '+d.updated+'</div>'+(d.errors.length?'<div class="err">Ошибки: '+d.errors.map(function(e){return 'стр.'+e.row+': '+e.error;}).join('; ')+'</div>':'');
+loadP();
+}else{msg(d.error||'Ошибка',false);}
+});
+}
+function dlTemplate(){
+fetch('/admin/excel-template',{headers:hdr()}).then(function(r){return r.blob();}).then(function(b){
+var a=document.createElement('a');
+a.href=URL.createObjectURL(b);
+a.download='template.xlsx';
+a.click();
+});
+}
+if(PASS)show();
 </script>
 </body>
 </html>

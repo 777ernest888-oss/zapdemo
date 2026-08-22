@@ -81,3 +81,44 @@ res.json({ ok: true });
 } catch (e) { res.status(500).json({ error: e.message }); }
 });
 module.exports = router;
+const multer = require('multer');
+const XLSX = require('xlsx');
+const { sendNotification } = require('../notify');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+router.get('/excel-template', function (req, res) {
+try {
+const wb = XLSX.utils.book_new();
+const ws = XLSX.utils.aoa_to_sheet([['article','name','price','stock','category','brand','car_brand'],['C10011','Пример товара',100,5,'Фильтры','Mann','Chery']]);
+XLSX.utils.book_append_sheet(wb, ws, 'products');
+const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+res.setHeader('Content-Disposition', 'attachment; filename="template.xlsx"');
+res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+res.send(buf);
+} catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.post('/import-excel', upload.single('file'), function (req, res) {
+try {
+if (!req.file) return res.status(400).json({ error: 'file required' });
+const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
+const ws = wb.Sheets[wb.SheetNames[0]];
+const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+let inserted = 0, updated = 0;
+const errors = [];
+rows.forEach(function (r, i) {
+const article = String(r.article || '').trim();
+const name = String(r.name || '').trim();
+const price = Number(r.price);
+if (!article) { errors.push({ row: i + 2, error: 'пустой артикул' }); return; }
+if (!name || isNaN(price) || price <= 0) { errors.push({ row: i + 2, error: 'некорректные name/price' }); return; }
+const stock = (r.stock === '' || isNaN(Number(r.stock))) ? 0 : Number(r.stock);
+const category = String(r.category || '').trim() || null;
+const brand = String(r.brand || '').trim() || null;
+const car_brand = String(r.car_brand || '').trim() || null;
+const ex = db.prepare('SELECT id FROM products WHERE article=?').get(article);
+if (ex) { db.prepare('UPDATE products SET name=?, category=?, brand=?, price=?, stock=?, car_brand=? WHERE id=?').run(name, category, brand, price, stock, car_brand, ex.id); updated++; }
+else { db.prepare('INSERT INTO products (article, name, category, brand, price, stock, car_brand) VALUES (?,?,?,?,?,?,?)').run(article, name, category, brand, price, stock, car_brand); inserted++; }
+});
+if (errors.length) { sendNotification('⚠️ Импорт Excel: ошибок ' + errors.length + ', вставлено ' + inserted + ', обновлено ' + updated); }
+res.json({ inserted: inserted, updated: updated, errors: errors });
+} catch (e) { console.error('[import]', e.message); res.status(500).json({ error: e.message }); }
+});
