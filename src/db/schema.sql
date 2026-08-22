@@ -27,3 +27,6 @@ CREATE TABLE IF NOT EXISTS requests (
     status TEXT DEFAULT 'new',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )
+
+-- v1.3.0: марка авто
+ALTER TABLE products ADD COLUMN car_brand TEXT;
