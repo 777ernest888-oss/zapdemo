@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Админ-панель</title>
+<style>
+body{font-family:system-ui;margin:0;padding:12px;background:#f5f5f5}
+h1{font-size:20px}
+h2{font-size:16px;margin:14px 0 6px}
+.nav{margin:8px 0}
+.nav a{display:inline-block;background:#667eea;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:14px;margin-right:6px}
+input{width:100%;padding:8px;margin:4px 0;border:1px solid #ccc;border-radius:6px;box-sizing:border-box}
+button{background:#667eea;color:#fff;border:0;padding:10px 14px;border-radius:8px;margin:4px 2px;cursor:pointer}
+button.red{background:#d33}
+button.gray{background:#999}
+.tab{background:#ddd;color:#333;font-weight:600}
+.tab.active{background:#333;color:#fff}
+.card{background:#fff;border-radius:8px;padding:10px;margin:8px 0}
+.hide{display:none}
+.err{color:#d33;margin:6px 0}
+.ok{color:#1a7f3c;margin:6px 0}
+.row{font-size:14px;margin:4px 0}
+.mode{background:#333;color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="nav"><a href="index.html?v=3">← Главная</a><a href="catalog.html?v=3">🛒 Каталог</a></div>
+<h1>⚙️ Админ-панель</h1>
+<div id="login">
+<input id="pass" type="password" placeholder="Пароль администратора">
+<button onclick="doLogin()">Войти</button>
+<div class="err" id="lerr"></div>
+</div>
+<div id="app" class="hide">
+<div class="mode">Вы в режиме администратора</div>
+<div>
+<button id="tabP" class="tab active" onclick="tab('p')">📦 Товары</button>
+<button id="tabR" class="tab" onclick="tab('r')">📋 Заявки</button>
+<button class="gray" onclick="logout()">Выход</button>
+</div>
+<div id="msg"></div>
+<div id="sec-p">
+<h2>Новый товар</h2>
+<input id="f_article" placeholder="Артикул *">
+<input id="f_name" placeholder="Название *">
+<input id="f_price" type="number" placeholder="Цена *">
+<input id="f_stock" type="number" placeholder="Наличие">
+<input id="f_category" placeholder="Категория">
+<input id="f_brand" placeholder="Бренд">
+<input id="f_car" placeholder="Марка авто">
+<button onclick="saveProd()">Сохранить</button>
+<h2>Список товаров</h2>
+<div id="plist"></div>
+</div>
+<div id="sec-r" class="hide">
+<h2>VIN-заявки</h2>
+<div id="rlist"></div>
+</div>
+</div>
+<script>
+var PASS=sessionStorage.getItem('apass')||'';
+var editId=null;
+function hdr(){return {'Content-Type':'application/json','x-admin-pass':PASS};}
+function doLogin(){
+PASS=document.getElementById('pass').value;
+fetch('/admin/products',{headers:hdr()}).then(function(r){
+if(r.ok){sessionStorage.setItem('apass',PASS);show();}
+else{document.getElementById('lerr').textContent='Неверный пароль';}
+});
+}
+function logout(){sessionStorage.removeItem('apass');location.reload();}
+function show(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loadP();loadR();}
+function tab(t){
+document.getElementById('sec-p').classList.toggle('hide',t!='p');
+document.getElementById('sec-r').classList.toggle('hide',t!='r');
+document.getElementById('tabP').classList.toggle('active',t=='p');
+document.getElementById('tabR').classList.toggle('active',t=='r');
+}
+function msg(t,ok){var m=document.getElementById('msg');m.innerHTML='<div class="'+(ok?'ok':'err')+'">'+t+'</div>';setTimeout(function(){m.innerHTML='';},3000);}
+function clearForm(){
+['f_article','f_name','f_price','f_stock','f_category','f_brand','f_car'].forEach(function(i){document.getElementById(i).value='';});
+editId=null;
+}
+function loadP(){
+fetch('/admin/products',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
+if(a.error){msg(a.error,false);return;}
+document.getElementById('plist').innerHTML=a.map(function(p){
+return '<div class="card"><div class="row"><b>'+p.article+'</b> — '+p.name+'</div><div class="row">'+(p.car_brand||'')+' · '+p.brand+' · '+p.price+' ₽ · налич:'+p.stock+'</div><button class="gray" onclick="editProd('+p.id+')">Ред.</button><button class="red" onclick="delProd('+p.id+')">Удалить</button></div>';
+}).join('')||'<p>Пусто</p>';
+});
+}
+function saveProd(){
+var b={
+article:document.getElementById('f_article').value.trim(),
+name:document.getElementById('f_name').value.trim(),
+price:document.getElementById('f_price').value===''?null:Number(document.getElementById('f_price').value),
+stock:document.getElementById('f_stock').value===''?0:Number(document.getElementById('f_stock').value),
+category:document.getElementById('f_category').value.trim()||null,
+brand:document.getElementById('f_brand').value.trim()||null,
+car_brand:document.getElementById('f_car').value.trim()||null
+};
+var url='/admin/products',method='POST';
+if(editId){url='/admin/products/'+editId;method='PUT';}
+fetch(url,{method:method,headers:hdr(),body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
+if(d.ok){msg('Сохранено',true);clearForm();loadP();}
+else{msg(d.error||'Ошибка',false);}
+});
+}
+function delProd(id){
+if(!confirm('Удалить товар?'))return;
+fetch('/admin/products/'+id,{method:'DELETE',headers:hdr()}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg('Удалено',true);loadP();}});
+}
+function editProd(id){
+fetch('/admin/products',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
+var p=null;
+for(var i=0;i<a.length;i++){if(a[i].id==id)p=a[i];}
+if(!p)return;
+editId=id;
+document.getElementById('f_article').value=p.article;
+document.getElementById('f_name').value=p.name;
+document.getElementById('f_price').value=p.price;
+document.getElementById('f_stock').value=p.stock;
+document.getElementById('f_category').value=p.category||'';
+document.getElementById('f_brand').value=p.brand||'';
+document.getElementById('f_car').value=p.car_brand||'';
+msg('Редактирование #'+id+' — измените и нажмите Сохранить',true);
+window.scrollTo(0,0);
+});
+}
+function loadR(){
+fetch('/admin/requests',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
+document.getElementById('rlist').innerHTML=a.map(function(x){
+return '<div class="card"><div class="row"><b>#'+x.id+'</b> '+x.type+' · '+x.status+'</div><div class="row">VIN: '+(x.vin||'—')+'</div><div class="row">'+x.description+'</div><div class="row">Контакт: '+(x.contact||'—')+'</div><button class="red" onclick="delReq('+x.id+')">Удалить</button></div>';
+}).join('')||'<p>Пусто</p>';
+});
+}
+function delReq(id){
+if(!confirm('Удалить заявку?'))return;
+fetch('/admin/requests/'+id,{method:'DELETE',headers:hdr()}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg('Удалено',true);loadR();}});
+}
+if(PASS)show();
+</script>
+<script>
+function prodUrl(a){return 'https://zap.prostors.ru/catalog.html?v=4&article='+encodeURIComponent(a);}
+function copyLink(a){var u=prodUrl(a);if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){msg('Ссылка скопирована',true);});}else{prompt('Скопируйте ссылку:',u);}}
+function shareTg(a){var u=prodUrl(a);window.open('https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Запчасть: '+a),'_blank');}
+function shareCatalog(){window.open('https://t.me/share/url?url='+encodeURIComponent('https://zap.prostors.ru/catalog.html?v=4')+'&text='+encodeURIComponent('Каталог автозапчастей'),'_blank');}
+function loadP(){
+fetch('/admin/products',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
+if(a.error){msg(a.error,false);return;}
+document.getElementById('plist').innerHTML=a.map(function(p){
+return '<div class="card"><div class="row"><b>'+p.article+'</b> — '+p.name+'</div><div class="row">'+(p.car_brand||'')+' · '+(p.brand||'')+' · '+p.price+' ₽ · налич:'+p.stock+'</div><button class="gray" onclick="editProd('+p.id+')">Ред.</button><button class="red" onclick="delProd('+p.id+')">Удалить</button><button class="gray" onclick="copyLink(\''+p.article+'\')">🔗</button><button class="gray" onclick="shareTg(\''+p.article+'\')">📤</button></div>';
+}).join('')||'<p>Пусто</p>';
+});
+}
+document.getElementById('tabR').insertAdjacentHTML('afterend','<button class="gray" onclick="shareCatalog()">📤 Каталог</button><button id="tabS" class="tab" onclick="tab(\'s\')">⚙️ Настройки</button>');
+document.getElementById('sec-r').insertAdjacentHTML('afterend','<div id="sec-s" class="hide"><h2>Настройки</h2><input id="s_brand" placeholder="Название бренда"><input id="s_phone" placeholder="Телефон"><input id="s_contact" placeholder="Контакты (TG)"><input id="s_about" placeholder="О компании"><input id="s_pass" type="password" placeholder="Новый пароль (если сменить)"><button onclick="saveS()">Сохранить настройки</button></div>');
+<script>
+function tab(t){
+document.getElementById('sec-p').classList.toggle('hide',t!='p');
+document.getElementById('sec-r').classList.toggle('hide',t!='r');
+document.getElementById('sec-s').classList.toggle('hide',t!='s');
+document.getElementById('tabP').classList.toggle('active',t=='p');
+document.getElementById('tabR').classList.toggle('active',t=='r');
+document.getElementById('tabS').classList.toggle('active',t=='s');
+if(t=='s')loadS();
+}
+function loadS(){
+fetch('/admin/settings',{headers:hdr()}).then(function(r){return r.json();}).then(function(s){
+document.getElementById('s_brand').value=s.brand_name||'';
+document.getElementById('s_phone').value=s.phone||'';
+document.getElementById('s_contact').value=s.contact_info||'';
+document.getElementById('s_about').value=s.about||'';
+});
+}
+function saveS(){
+var b={brand_name:document.getElementById('s_brand').value,phone:document.getElementById('s_phone').value,contact_info:document.getElementById('s_contact').value,about:document.getElementById('s_about').value};
+var np=document.getElementById('s_pass').value.trim();
+if(np)b.new_password=np;
+fetch('/admin/settings',{method:'POST',headers:hdr(),body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
+if(d.ok){msg('Настройки сохранены',true);document.getElementById('s_pass').value='';}
+else{msg(d.error||'Ошибка',false);}
+});
+}
+</script>
+</body>
+</html>

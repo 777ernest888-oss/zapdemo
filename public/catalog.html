@@ -6,38 +6,102 @@
 <title>Каталог - Автозапчасти</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-body{font-family:system-ui;margin:0;padding:64px 12px 12px;background:#f5f5f5}
-.hd{position:fixed;top:0;left:0;right:0;background:#fff;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;gap:8px;align-items:center;z-index:10}
+body{font-family:system-ui;margin:0;padding:56px 12px 12px;background:#f5f5f5}
+.hd{position:fixed;top:0;left:0;right:0;background:#fff;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;gap:8px;align-items:center;z-index:10;flex-wrap:wrap}
 .hd a{background:#667eea;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:14px}
-.hd b{flex:1;text-align:center}
+.hd .adm{background:#333}
 input,select{width:100%;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin:4px 0}
 .item{background:#fff;border-radius:8px;padding:12px;margin:8px 0}
+.item.highlight{border:2px solid #ffd700}
 .price{color:#1a7f3c;font-weight:700}
 .cb{color:#667eea;font-size:13px}
+.row{font-size:14px;margin:4px 0}
+.sec{background:#fff;border-radius:10px;padding:14px;margin:12px 0}
+.sec h2{margin:0 0 8px;font-size:16px}
+.sec button{background:#667eea;color:#fff;border:0;padding:10px 14px;border-radius:8px;margin:4px 2px;cursor:pointer;font-size:14px}
+.itembtns{margin-top:6px}
+.itembtns button{background:#888;font-size:12px;padding:6px 10px}
+.itembtns button.share{background:#0088cc}
+.msg{color:#1a7f3c;font-size:13px;margin-top:4px;display:none}
 </style>
 </head>
 <body>
-<div class="hd"><a href="index.html">← Главная</a><b>🚗 Каталог</b><a href="vin.html?v=2" style="background:#ffd700;color:#333;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:14px">🔍 VIN</a></div>
+<div class="hd">
+<a href="index.html?v=4">← Главная</a>
+<a href="vin.html?v=4">🔍 VIN</a>
+<a class="adm hide" id="admlink" href="admin.html?v=4">⚙️ Админ</a>
+</div>
 <input id="q" type="search" placeholder="Артикул или название">
 <select id="cb"><option value="">Все марки авто</option></select>
 <div id="list"></div>
 <script>
 var list=document.getElementById('list'),q=document.getElementById('q'),cb=document.getElementById('cb'),t;
+var params=new URLSearchParams(location.search);
+var targetArticle=(params.get('article')||'').toUpperCase();
 q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(load,300);});
 cb.addEventListener('change',load);
-function load(){
-var url='/api/products?q='+encodeURIComponent(q.value)+'&limit=50';
-if(cb.value)url+='&car_brand='+encodeURIComponent(cb.value);
-fetch(url).then(function(r){return r.json();}).then(function(d){
-list.innerHTML=d.items.map(function(p){
-return '<div class="item"><b>'+p.article+'</b> — '+p.name+'<div class="cb">'+(p.car_brand||'')+' · '+p.brand+'</div><div class="price">'+p.price+' ₽ · наличие: '+p.stock+'</div></div>';
+function shareUrl(article){
+var base='https://zap.prostors.ru/catalog.html';
+return base+'?article='+encodeURIComponent(article);
+}
+function copyLink(article){
+var u=shareUrl(article);
+if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){alert('Ссылка скопирована:\n'+u);});}
+else{prompt('Скопируйте ссылку:',u);}
+}
+function shareTg(article){
+var u=shareUrl(article);
+var text='Посмотри запчасть: '+article;
+window.open('https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent(text),'_blank');
+}
+function render(items){
+list.innerHTML=items.map(function(p){
+var hl=targetArticle&&p.article.toUpperCase()===targetArticle?' highlight':'';
+return '<div class="item'+hl+'" id="p'+p.id+'"><b>'+p.article+'</b> — '+p.name+'<div class="cb">'+(p.car_brand||'')+' · '+(p.brand||'')+'</div><div class="price">'+p.price+' ₽ · наличие: '+p.stock+'</div><div class="itembtns"><button onclick="copyLink(\''+p.article+'\')">🔗 Копировать</button><button class="share" onclick="shareTg(\''+p.article+'\')">📤 Переслать</button></div></div>';
 }).join('')||'<p>Пока пусто</p>';
-});
+if(targetArticle){var el=document.getElementById('p'+items.find(function(x){return x.article.toUpperCase()===targetArticle;}).id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+}
+function load(){
+var url='/api/products?q='+encodeURIComponent(q.value)+'&limit=200';
+if(cb.value)url+='&car_brand='+encodeURIComponent(cb.value);
+fetch(url).then(function(r){return r.json();}).then(function(d){render(d.items);});
 }
 fetch('/api/products/car_brands').then(function(r){return r.json();}).then(function(a){
 cb.innerHTML='<option value="">Все марки авто</option>'+a.map(function(b){return '<option>'+b+'</option>';}).join('');
 });
 load();
+<div class="sec" id="vinsec">
+<h2>🔍 VIN-запрос</h2>
+<div class="row">Не нашли запчасть? Отправьте VIN — подберём.</div>
+<input id="v_vin" placeholder="VIN (необязательно)">
+<input id="v_desc" placeholder="Что нужно *">
+<input id="v_contact" placeholder="Контакт">
+<button onclick="sendVin()">Отправить заявку</button>
+<div class="msg" id="v_ok">✅ Заявка отправлена!</div>
+</div>
+<div class="sec">
+<h2>📞 Контакты</h2>
+<div id="contacts" class="row">Загрузка…</div>
+</div>
+<script>
+var ADMIN_TG_ID=2038206387;
+try{
+var u=Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user;
+if(u&&u.id===ADMIN_TG_ID)document.getElementById('admlink').classList.remove('hide');
+}catch(e){}
+function sendVin(){
+var desc=document.getElementById('v_desc').value.trim();
+if(!desc){alert('Укажите, что нужно');return;}
+fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vin:document.getElementById('v_vin').value.trim(),description:desc,contact:document.getElementById('v_contact').value.trim()})})
+.then(function(r){return r.json();}).then(function(d){if(d.ok){document.getElementById('v_ok').style.display='block';document.getElementById('v_desc').value='';document.getElementById('v_vin').value='';document.getElementById('v_contact').value='';}});
+}
+fetch('/api/settings').then(function(r){return r.json();}).then(function(s){
+var html='';
+if(s.phone)html+='<div>📱 <a href="tel:'+s.phone.replace(/\s/g,'')+'">'+s.phone+'</a></div>';
+if(s.contact_info)html+='<div>'+s.contact_info+'</div>';
+if(s.about)html+='<div style="margin-top:8px;font-size:13px;color:#555">'+s.about+'</div>';
+document.getElementById('contacts').innerHTML=html||'Контакты не указаны';
+});
 Telegram.WebApp.ready();
 </script>
 </body>

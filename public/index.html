@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -7,43 +7,28 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 body{margin:0;font-family:system-ui;background:#f5f5f5}
-.hd{position:fixed;top:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;justify-content:space-between;align-items:center;z-index:10}
-.hd b{font-size:18px}
-.hd button{border:0;background:#667eea;color:#fff;font-size:18px;padding:6px 12px;border-radius:8px}
-.hero{margin-top:56px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:24px 16px}
+.hero{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:24px 16px}
 .hero img{width:100%;max-width:420px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
-.hero h1{font-size:26px;margin:16px 0 8px}
-.hero p{opacity:.9;margin:0 0 20px}
-.btn{display:inline-block;background:#fff;color:#667eea;padding:14px 32px;border-radius:10px;font-weight:600;text-decoration:none}
-.ft{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
-.ft div{background:#fff;border-radius:12px;padding:14px;text-align:center}
-.ft b{display:block;margin-bottom:4px}
-.ft span{font-size:13px;color:#666}
+.hero h1{font-size:26px;margin:16px 0 12px}
+.ft{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:460px;margin:0 auto}
+.ft div{background:rgba(255,255,255,.15);border-radius:12px;padding:14px;font-size:14px}
+.cta{display:block;margin:20px 16px;background:#ffd700;color:#333;padding:18px;border-radius:14px;font-weight:700;font-size:18px;text-decoration:none;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 </style>
 </head>
 <body>
-<div class="hd"><b>🚗 Автозапчасти</b><button onclick="menu()">☰</button></div>
 <div class="hero">
 <img src="images/hero.jpg" alt="">
-<h1>Качественные автозапчасти</h1>
-<p>Подберём и доставим для вашего авто</p>
-<a class="btn" href="catalog.html?v=2">Открыть каталог</a> <a class="btn" style="background:#ffd700;color:#333" href="vin.html?v=2">🔍 VIN-запрос</a>
-</div>
+<h1>Запчасти для любых китайских авто</h1>
 <div class="ft">
-<div><b>📦</b><span>Большой выбор</span></div>
-<div><b>🚚</b><span>Быстрая доставка</span></div>
-<div><b>💰</b><span>Низкие цены</span></div>
-<div><b>🔧</b><span>Помощь в подборе</span></div>
+<div>📦 В наличии и под заказ</div>
+<div>🔍 Поиск по VIN</div>
+<div>✅ Гарантия</div>
+<div>💰 Низкие цены</div>
 </div>
+</div>
+<a class="cta" href="catalog.html?v=4">Начать поиск</a>
 <script>
-function menu(){
-var m=prompt('Меню: 1-Каталог 2-Контакты 3-Админка');
-if(m=='1')location='catalog.html';
-if(m=='2')alert('Telegram: @ernest_812');
-if(m=='3')location='admin.html';
-}
 Telegram.WebApp.ready();
-Telegram.WebApp.expand();
 </script>
 </body>
 </html>
