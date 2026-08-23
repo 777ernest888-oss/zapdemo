@@ -1,15 +1,17 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Автозапчасти</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script defer src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
+:root{--primary:#667eea;--accent:#764ba2}
 body{margin:0;font-family:system-ui;background:#f5f5f5}
-.hero{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:12px 10px}
+.hero{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;text-align:center;padding:12px 10px}
 .hero img{width:94%;max-width:430px;height:auto;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
-.hero h1{font-size:clamp(18px,5.5vw,24px);margin:10px 0 8px}
+.hero h1{font-size:clamp(18px,5.5vw,24px);margin:10px 0 6px}
+.hero p{margin:4px 0 10px;font-size:clamp(12px,3.5vw,15px);opacity:.9}
 .ft{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:460px;margin:0 auto}
 .ft div{background:rgba(255,255,255,.15);border-radius:10px;padding:clamp(7px,2vh,12px);font-size:clamp(11px,3.2vw,14px)}
 .cta{display:block;margin:10px 16px;background:#ffd700;color:#333;padding:clamp(12px,2vh,18px);border-radius:14px;font-weight:700;font-size:clamp(15px,4.5vw,19px);text-decoration:none;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.2)}
@@ -17,18 +19,26 @@ body{margin:0;font-family:system-ui;background:#f5f5f5}
 </head>
 <body>
 <div class="hero">
-<img src="images/hero.jpg" alt="">
-<h1>Запчасти для любых китайских авто</h1>
+<img id="hero_img" src="images/hero.jpg" alt="">
+<h1 id="shop_name">Автозапчасти</h1>
+<p id="slogan"></p>
 <div class="ft">
 <div>📦 В наличии и под заказ</div>
-<div>🔍 Поиск по VIN</div>
+<div>🔍 Поиск по артикулу и VIN</div>
 <div>✅ Гарантия</div>
 <div>💰 Низкие цены</div>
 </div>
 </div>
-<a class="cta" href="catalog.html?v=5">Начать поиск</a>
+<a class="cta" href="catalog.html?v=9">Начать поиск</a>
 <script>
-Telegram.WebApp.ready();
+fetch('/api/config').then(function(r){return r.json();}).then(function(c){
+if(c.shop_name){document.getElementById('shop_name').textContent=c.shop_name;document.title=c.shop_name;}
+if(c.slogan)document.getElementById('slogan').textContent=c.slogan;
+if(c.hero_url)document.getElementById('hero_img').src=c.hero_url;
+if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);
+if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);
+});
+if(window.Telegram)Telegram.WebApp.ready();
 </script>
 </body>
 </html>

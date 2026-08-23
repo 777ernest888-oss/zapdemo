@@ -3,95 +3,136 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Каталог - Автозапчасти</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>Каталог</title>
+<script defer src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-body{font-family:system-ui;margin:0;padding:56px 12px 12px;background:#f5f5f5}
-.hd{position:fixed;top:0;left:0;right:0;background:#fff;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;gap:8px;align-items:center;z-index:10;flex-wrap:wrap}
-.hd a{background:#667eea;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:14px}
-.hd .adm{background:#333}
-.hide{display:none}
-input,select{width:100%;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin:4px 0}
-.item{background:#fff;border-radius:8px;padding:12px;margin:8px 0}
-.item.highlight{border:2px solid #ffd700}
-.price{color:#1a7f3c;font-weight:700}
-.cb{color:#667eea;font-size:13px}
-.row{font-size:14px;margin:4px 0}
-.sec{background:#fff;border-radius:10px;padding:14px;margin:12px 0}
-.sec h2{margin:0 0 8px;font-size:16px}
-.sec button{background:#667eea;color:#fff;border:0;padding:10px 14px;border-radius:8px;margin:4px 2px;cursor:pointer;font-size:14px}
-.itembtns{margin-top:6px}
-.itembtns button{background:#888;font-size:12px;padding:6px 10px}
-.itembtns button.share{background:#0088cc}
-.msg{color:#1a7f3c;font-size:13px;margin-top:4px;display:none}
+:root{--primary:#667eea;--accent:#764ba2}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+[hidden]{display:none!important}
+body{margin:0;font-family:system-ui;background:#f5f5f5;padding:0 0 64px}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,var(--primary),var(--accent));padding:8px 10px;color:#fff}
+#shop{font-weight:700;font-size:15px;margin-bottom:6px}
+#q{width:100%;padding:10px 12px;border:none;border-radius:10px;font-size:15px}
+#upd{font-size:11px;opacity:.85;margin-top:4px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px}
+.filters select,.filters label{font-size:13px;padding:6px 8px;border-radius:8px;border:1px solid #ddd;background:#fff}
+.filters label{display:flex;align-items:center;gap:4px}
+.card{background:#fff;border-radius:12px;margin:8px 10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card .name{font-size:15px;font-weight:600}
+.card .art{font-size:12px;color:#888}
+.card .row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.price{font-size:18px;font-weight:800}
+.badge{font-size:11px;padding:3px 8px;border-radius:20px;color:#fff}
+.b-in{background:#2e9e44}.b-out{background:#e6a000}
+#more{display:block;margin:10px auto;padding:10px 20px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:14px}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #ddd;z-index:6}
+nav.tabs button{flex:1;padding:12px 0;border:none;background:none;font-size:12px;color:#555}
+nav.tabs button.on{color:var(--primary);font-weight:700}
+section{min-height:60vh}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;display:flex;align-items:flex-end}
+.mbox{background:#fff;width:100%;max-height:85vh;overflow:auto;border-radius:16px 16px 0 0;padding:14px}
+.mbox h3{margin:0 0 6px}
+.mrow{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.mbtn{display:inline-block;margin:4px 6px 4px 0;padding:10px 14px;border:none;border-radius:10px;font-size:14px;text-decoration:none;color:#fff;background:var(--primary)}
+.an{padding:8px;border-top:1px solid #eee;font-size:13px;display:flex;justify-content:space-between}
+.sel{padding:10px}
+.sel select{width:100%;padding:10px;margin:6px 0;border-radius:10px;border:1px solid #ddd;font-size:15px}
+.catbtn{display:inline-block;margin:4px;padding:10px 14px;border-radius:10px;background:var(--primary);color:#fff;border:none;font-size:14px}
+form{padding:10px;display:flex;flex-direction:column;gap:8px}
+form input,form textarea{padding:10px;border-radius:10px;border:1px solid #ddd;font-size:15px;font-family:inherit}
+form button{padding:12px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:15px;font-weight:700}
+.info{padding:12px;font-size:15px}
+.info div{background:#fff;border-radius:10px;margin:6px 0;padding:10px}
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;display:none;z-index:20}
 </style>
 </head>
 <body>
-<div class="hd">
-<a href="index.html?v=5">← Главная</a>
-<a href="#vinsec">🔍 VIN</a>
-<a class="adm hide" id="admlink" href="admin.html?v=5">⚙️ Админ</a>
+<header>
+<div id="shop">Каталог</div>
+<input id="q" placeholder="Артикул или название…">
+<div id="upd"></div>
+</header>
+<section id="t-catalog">
+<div class="filters">
+<label><input type="checkbox" id="f_stock"> Только в наличии</label>
+<select id="f_brand"><option value="">Бренд</option></select>
+<select id="f_cat"><option value="">Категория</option></select>
+<select id="f_car"><option value="">Марка</option></select>
+<select id="f_sort"><option value="">Сортировка</option><option value="price_asc">Цена ↑</option><option value="price_desc">Цена ↓</option><option value="stock">Сначала в наличии</option></select>
 </div>
-<input id="q" type="search" placeholder="Артикул или название">
-<select id="cb"><option value="">Все марки авто</option></select>
 <div id="list"></div>
-<div class="sec" id="vinsec">
-<h2>🔍 VIN-запрос</h2>
-<div class="row">Не нашли запчасть? Отправьте VIN — подберём.</div>
+<button id="more" onclick="shown+=20;render()">Показать ещё</button>
+</section>
+<section id="t-select" hidden>
+<div class="sel">
+<select id="s_car" onchange="selModel()"><option value="">Марка…</option></select>
+<select id="s_model" onchange="selYear()" hidden><option value="">Модель…</option></select>
+<select id="s_year" onchange="selCats()" hidden><option value="">Год…</option></select>
+<div id="s_cats"></div>
+<div id="s_list"></div>
+</div>
+</section>
+<section id="t-vin" hidden>
+<form onsubmit="sendVin(event)">
 <input id="v_vin" placeholder="VIN (необязательно)">
-<input id="v_desc" placeholder="Что нужно *">
-<input id="v_contact" placeholder="Контакт">
-<button onclick="sendVin()">Отправить заявку</button>
-<div class="msg" id="v_ok">✅ Заявка отправлена!</div>
+<textarea id="v_desc" rows="3" placeholder="Что нужно? Например: бампер передний" required></textarea>
+<input id="v_contact" placeholder="Контакт (телефон или @telegram)" required>
+<button>Отправить запрос</button>
+</form>
+<div id="vin_msg" class="info"></div>
+</section>
+<section id="t-info" hidden>
+<div class="info">
+<div id="i_phone"></div>
+<div id="i_contact"></div>
+<div id="i_about"></div>
+<div id="i_pay"></div>
+<div id="i_del"></div>
+<a id="i_write" class="mbtn">✈️ Написать</a>
 </div>
-<div class="sec">
-<h2>📞 Контакты</h2>
-<div id="contacts" class="row">Загрузка…</div>
+</section>
+<nav class="tabs">
+<button class="on" onclick="tab('catalog',this)">Каталог</button>
+<button onclick="tab('select',this)">Подбор</button>
+<button onclick="tab('vin',this)">VIN</button>
+<button onclick="tab('info',this)">Инфо</button>
+</nav>
+<div id="modal" class="modal" hidden onclick="if(event.target===this)this.hidden=true">
+<div class="mbox">
+<h3 id="m_name"></h3>
+<div id="m_art" class="art"></div>
+<div class="mrow"><span id="m_price" class="price"></span><span id="m_badge"></span></div>
+<div id="m_term" style="font-size:13px;color:#666"></div>
+<div><a id="m_write" class="mbtn">✈️ Написать</a><button class="mbtn" onclick="copyLink()">🔗 Ссылка</button><button class="mbtn" style="background:#888" onclick="document.getElementById('modal').hidden=true">Закрыть</button></div>
+<h4 style="margin:12px 0 4px">Аналоги (не дороже)</h4>
+<div id="m_an"></div>
 </div>
+</div>
+<div id="toast"></div>
 <script>
-var list=document.getElementById('list'),q=document.getElementById('q'),cb=document.getElementById('cb'),t;
-var params=new URLSearchParams(location.search);
-var targetArticle=(params.get('article')||'').toUpperCase();
-q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(load,300);});
-cb.addEventListener('change',load);
-function shareUrl(a){return 'https://zap.prostors.ru/catalog.html?article='+encodeURIComponent(a);}
-function copyLink(a){var u=shareUrl(a);if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){alert('Ссылка скопирована');});}else{prompt('Скопируйте ссылку:',u);}}
-function shareTg(a){var u=shareUrl(a);window.open('https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Запчасть: '+a),'_blank');}
-function render(items){
-list.innerHTML=items.map(function(p){
-var hl=targetArticle&&p.article.toUpperCase()===targetArticle?' highlight':'';
-return '<div class="item'+hl+'" id="p'+p.id+'"><b>'+p.article+'</b> — '+p.name+'<div class="cb">'+(p.car_brand||'')+' · '+(p.brand||'')+'</div><div class="price">'+p.price+' ₽ · наличие: '+p.stock+'</div><div class="itembtns"><button onclick="copyLink(\''+p.article+'\')">🔗 Копировать</button><button class="share" onclick="shareTg(\''+p.article+'\')">📤 Переслать</button></div></div>';
-}).join('')||'<p>Пока пусто</p>';
-if(targetArticle){for(var i=0;i<items.length;i++){if(items[i].article.toUpperCase()===targetArticle){var el=document.getElementById('p'+items[i].id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}}}
-}
-function load(){
-var url='/api/products?q='+encodeURIComponent(q.value)+'&limit=200';
-if(cb.value)url+='&car_brand='+encodeURIComponent(cb.value);
-fetch(url).then(function(r){return r.json();}).then(function(d){render(d.items);});
-}
-fetch('/api/products/car_brands').then(function(r){return r.json();}).then(function(a){
-cb.innerHTML='<option value="">Все марки авто</option>'+a.map(function(b){return '<option>'+b+'</option>';}).join('');
-});
-function sendVin(){
-var desc=document.getElementById('v_desc').value.trim();
-if(!desc){alert('Укажите, что нужно');return;}
-fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vin:document.getElementById('v_vin').value.trim(),description:desc,contact:document.getElementById('v_contact').value.trim()})})
-.then(function(r){return r.json();}).then(function(d){if(d.ok){document.getElementById('v_ok').style.display='block';document.getElementById('v_desc').value='';document.getElementById('v_vin').value='';document.getElementById('v_contact').value='';}});
-}
-fetch('/api/settings').then(function(r){return r.json();}).then(function(s){
-var html='';
-if(s.phone)html+='<div>📱 <a href="tel:'+s.phone.replace(/\s/g,'')+'">'+s.phone+'</a></div>';
-if(s.contact_info)html+='<div>'+s.contact_info+'</div>';
-if(s.about)html+='<div style="margin-top:8px;font-size:13px;color:#555">'+s.about+'</div>';
-document.getElementById('contacts').innerHTML=html||'Контакты не указаны';
-});
-var ADMIN_TG_ID=2038206387;
-try{
-var u=Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user;
-if(u&&u.id===ADMIN_TG_ID)document.getElementById('admlink').classList.remove('hide');
-}catch(e){}
-load();
-Telegram.WebApp.ready();
+var CFG={},PRODS=[],shown=20,cur=null;
+function $(i){return document.getElementById(i);}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
+function badge(p){return p.stock>0?'<span class="badge b-in">В наличии</span>':'<span class="badge b-out">Под заказ (3–5 дн.)</span>';}
+function card(p){return '<div class="card" onclick="openP('+p.id+')"><div class="name">'+p.name+'</div><div class="art">'+p.article+(p.car_brand?' · '+p.car_brand:'')+'</div><div class="row"><span class="price">'+p.price+' ₽</span>'+badge(p)+'</div></div>';}
+function tab(t,btn){var s=document.querySelectorAll('section');for(var i=0;i<s.length;i++)s[i].hidden=true;$('t-'+t).hidden=false;var b=document.querySelectorAll('nav.tabs button');for(var i=0;i<b.length;i++)b[i].className='';btn.className='on';}
+function render(){var q=$('q').value.trim().toLowerCase();var l=PRODS.filter(function(p){if(q&&(p.article||'').toLowerCase().indexOf(q)<0&&(p.name||'').toLowerCase().indexOf(q)<0)return false;if($('f_stock').checked&&p.stock<=0)return false;if($('f_brand').value&&p.brand!==$('f_brand').value)return false;if($('f_cat').value&&p.category!==$('f_cat').value)return false;if($('f_car').value&&p.car_brand!==$('f_car').value)return false;return true;});var s=$('f_sort').value;if(s==='price_asc')l.sort(function(a,b){return a.price-b.price;});if(s==='price_desc')l.sort(function(a,b){return b.price-a.price;});if(s==='stock')l.sort(function(a,b){return b.stock-a.stock;});var h='';for(var i=0;i<Math.min(shown,l.length);i++)h+=card(l[i]);$('list').innerHTML=h||'<div class="info">Ничего не найдено</div>';$('more').style.display=l.length>shown?'block':'none';}
+function openP(id){var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];if(!p)return;cur=p;$('m_name').textContent=p.name;$('m_art').textContent=p.article;$('m_price').textContent=p.price+' ₽';$('m_badge').innerHTML=badge(p);$('m_term').textContent=p.stock>0?'Отгрузка сегодня':'Срок поставки 3–5 дней';tgLink($('m_write'));fetch('/api/analogs/'+id).then(function(r){return r.json();}).then(function(a){var h='';for(var i=0;i<a.length;i++)h+='<div class="an" onclick="openP('+a[i].id+')"><span>'+a[i].name+'</span><b>'+a[i].price+' ₽</b></div>';$('m_an').innerHTML=h||'<div style="font-size:13px;color:#888">Нет аналогов</div>';});$('modal').hidden=false;}
+function tgLink(el){var m=(CFG.contact_info||'').match(/@([A-Za-z0-9_]+)/);el.href=m?('https://t.me/'+m[1]):'#';el.target='_blank';}
+function copyLink(){if(cur&&navigator.clipboard){navigator.clipboard.writeText(location.origin+'/catalog.html?v=7#p'+cur.id);toast('Ссылка скопирована');}}
+function sendVin(e){e.preventDefault();var b={vin:$('v_vin').value.trim(),description:$('v_desc').value.trim(),contact:$('v_contact').value.trim()};fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){$('vin_msg').innerHTML='<div>✅ Запрос отправлен. Ответим в ближайшее время.</div>';setTimeout(function(){document.getElementById('vin_msg').innerHTML='';},4000);$('v_vin').value='';$('v_desc').value='';$('v_contact').value='';toast('Запрос отправлен');}else{$('vin_msg').innerHTML='<div>❌ '+(d.error||'Ошибка отправки')+'</div>';}}).catch(function(){$('vin_msg').innerHTML='<div>❌ Ошибка отправки</div>';});}
+function fillSel(sel,vals){var h='<option value="">'+sel.options[0].textContent+'</option>';for(var i=0;i<vals.length;i++)h+='<option>'+vals[i]+'</option>';sel.innerHTML=h;}
+function dvals(f){var m={};for(var i=0;i<PRODS.length;i++){var v=f(PRODS[i]);if(v)m[v]=1;}return Object.keys(m).sort();}
+function selModel(){var c=$('s_car').value;$('s_model').hidden=!c;$('s_year').hidden=true;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!c)return;fillSel($('s_model'),dvals(function(p){return p.car_brand===c?p.model:null;}));}
+function selYear(){var c=$('s_car').value,m=$('s_model').value;$('s_year').hidden=!m;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!m)return;fillSel($('s_year'),dvals(function(p){return p.car_brand===c&&p.model===m?p.year:null;}));}
+function selCats(){var c=$('s_car').value,m=$('s_model').value,y=$('s_year').value;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!y)return;var cats=dvals(function(p){return p.car_brand===c&&p.model===m&&p.year===y?p.category:null;});var h='';for(var i=0;i<cats.length;i++)h+='<button class="catbtn" onclick="selList(\''+cats[i].replace(/'/g,"\\'")+'\')">'+cats[i]+'</button>';$('s_cats').innerHTML=h;}
+function selList(cat){var c=$('s_car').value,m=$('s_model').value,y=$('s_year').value;var l=PRODS.filter(function(p){return p.car_brand===c&&p.model===m&&p.year===y&&p.category===cat;});var h='';for(var i=0;i<l.length;i++)h+=card(l[i]);$('s_list').innerHTML=h;}
+fetch('/api/config').then(function(r){return r.json();}).then(function(c){CFG=c;if(c.shop_name)$('shop').textContent=c.shop_name;if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);$('upd').textContent='Наличие обновлено: '+(c.updated_at||'').slice(0,10);$('i_phone').innerHTML=c.phone?('<a href="tel:'+c.phone.replace(/[^0-9+]/g,'')+'">📞 '+c.phone+'</a>'):'';$('i_contact').textContent=c.contact_info||'';$('i_about').textContent=c.about||'';$('i_pay').textContent='💳 '+(c.payment_text||'');$('i_del').textContent='🚚 '+(c.delivery_text||'');tgLink($('i_write'));var bs=dvals(function(p){return p.brand;}),cs=dvals(function(p){return p.category;}),ms=dvals(function(p){return p.car_brand;});fillSel($('f_brand'),bs);fillSel($('f_cat'),cs);fillSel($('f_car'),ms);fillSel($('s_car'),ms);});
+fetch('/api/products?limit=1000').then(function(r){return r.json();}).then(function(a){PRODS=a.items||a;render();});
+$('q').oninput=function(){render();};
+$('f_stock').onchange=render;$('f_brand').onchange=render;$('f_cat').onchange=render;$('f_car').onchange=render;$('f_sort').onchange=render;
+if(window.Telegram)Telegram.WebApp.ready();
 </script>
 </body>
 </html>

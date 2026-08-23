@@ -5,6 +5,7 @@ const { Telegraf, Markup } = require('telegraf');
 const products = require('./routes/products');
 const requests = require('./routes/requests');
 const admin = require('./routes/admin');
+const config = require('./routes/config');
 const settings = require('./routes/settings');
 const app = express();
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use('/api/products', products);
 app.use('/api/requests', requests);
 app.use('/api/settings', settings);
 app.use('/admin', admin);
+app.use('/api/config', config);
 app.get('/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 app.listen(process.env.PORT || 3000, () => console.log('API_UP'));
 function launchWithRetry(instance, label, delay) {

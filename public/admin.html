@@ -34,6 +34,7 @@ button.gray{background:#999}
 </div>
 <div id="app" class="hide">
 <div class="mode">Вы в режиме администратора</div>
+<div id="pwbanner" class="err hide">⚠️ Действует пароль по умолчанию — смените в «Настройках»</div>
 <div>
 <button id="tabP" class="tab active" onclick="tab('p')">📦 Товары</button>
 <button id="tabR" class="tab" onclick="tab('r')">📋 Заявки</button>
@@ -72,7 +73,8 @@ button.gray{background:#999}
 <input id="s_phone" placeholder="Телефон">
 <input id="s_contact" placeholder="Контакты (TG)">
 <input id="s_about" placeholder="О компании">
-<input id="s_pass" type="password" placeholder="Новый пароль (если сменить)">
+<input id="s_pass" type="password" placeholder="Новый пароль (если сменить, мин. 8 символов)">
+<input id="s_pass2" type="password" placeholder="Повторите новый пароль">
 <button onclick="saveS()">Сохранить настройки</button>
 </div>
 </div>
@@ -88,7 +90,7 @@ else{document.getElementById('lerr').textContent='Неверный пароль'
 });
 }
 function logout(){sessionStorage.removeItem('apass');location.reload();}
-function show(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loadP();loadR();}
+function show(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loadP();loadR();checkPass();}
 function tab(t){
 document.getElementById('sec-p').classList.toggle('hide',t!='p');
 document.getElementById('sec-r').classList.toggle('hide',t!='r');
@@ -201,6 +203,8 @@ a.download='template.xlsx';
 a.click();
 });
 }
+function checkPass(){fetch("/admin/settings",{headers:hdr()}).then(function(r){return r.json();}).then(function(x){document.getElementById("pwbanner").classList.toggle("hide",!!x.has_pass);});}
+function saveS(){var np=document.getElementById("s_pass").value.trim();var np2=document.getElementById("s_pass2").value.trim();if(np){if(np.length<8){msg("Пароль минимум 8 символов",false);return;}if(np!==np2){msg("Пароли не совпадают",false);return;}}var b={brand_name:document.getElementById("s_brand").value,phone:document.getElementById("s_phone").value,contact_info:document.getElementById("s_contact").value,about:document.getElementById("s_about").value};if(np)b.new_password=np;fetch("/admin/settings",{method:"POST",headers:hdr(),body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg("Настройки сохранены",true);document.getElementById("s_pass").value="";document.getElementById("s_pass2").value="";checkPass();}else{msg(d.error||"Ошибка",false);}});}
 if(PASS)show();
 </script>
 </body>

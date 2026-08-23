@@ -1,8 +1,9 @@
 ﻿# ПАСПОРТ ПРОЕКТА «МИНИ-АПП АВТОЗАПЧАСТИ»
 
-**Дата создания:** 21 августа 2026 
-**Версия:** 1.2.0 
-**Статус:** Демо-версия (готовность ~60%)
+**Дата создания:** 21 августа 2026 
+Версия: 1.4.1
+Статус: Демо готово к редизайну C2 (23.08.2026)
+✅ C1 (шаблонизация tenant_config) + C2 (редизайн: 4 таба, липкий поиск, бейджи, аналоги, подбор, VIN, Инфо) — задеплоено 23.08
 
 ---
 
@@ -40,7 +41,11 @@
 - Отдельный бот-токен
 - Код/БД/volumes/секреты ProStors НЕ трогать
 - Единственные точки контакта: сеть `prostors-saas_prostors_net` (одобрено владельцем) и nginx (server-блок `zap.prostors.ru`)
-- **НИКОГДА не смешивать с ProStors**
+- **НИКОГДА не смешивать с ProStors
+0.6 Правки паспорта
+Qwen правит паспорт ТОЛЬКО готовыми командами для PuTTY (патч в контейнере, уникальные маркеры), НЕ текстом для ручного копирования. Владелец выполняет и присылает вывод.**
+0.7 Разделение труда
+Qwen делает свою работу сам: анализ, правки, подготовка файлов. Перекладывание работы на владельца запрещено. Нарушение = стоп и отчёт куратору.
 
 ---
 
@@ -50,7 +55,7 @@
 Telegram Mini App + бот для магазина автозапчастей. Цель: демонстрация знакомому владельца, затем полная передача проекта.
 
 ### 1.2 Владелец
-- **Имя:** Эрнест Гареев 
+- **Имя:** Эрнест Гареев 
 - **Telegram:** @ernest_812 ⚠️ **ИСПРАВЛЕНО** (было @777ernest888 — это логин платформы, не username)
 - **Telegram User ID:** 2038206387
 
@@ -91,33 +96,33 @@ Telegram Mini App + бот для магазина автозапчастей. �
 ```
 /root/zapdemo/
 ├── data/
-│   └── parts.db              # SQLite БД (bind-mount)
+│   └── parts.db              # SQLite БД (bind-mount)
 ├── public/
-│   └── index.html            # Mini App фронтенд
+│   └── index.html            # Mini App фронтенд
 ├── src/
-│   ├── index.js              # Точка входа (Express + Telegraf)
-│   ├── routes/
-│   │   └── products.js       # API endpoints
-│   └── db.js                 # (опционально)
-├── .env                       # Переменные окружения (СЕКРЕТЫ ЗДЕСЬ)
-├── Dockerfile                 # Сборка образа
-├── package.json               # Зависимости
-└── smoke.sh                   # Smoke-тесты
+│   ├── index.js              # Точка входа (Express + Telegraf)
+│   ├── routes/
+│   │   └── products.js       # API endpoints
+│   └── db.js                 # (опционально)
+├── .env                       # Переменные окружения (СЕКРЕТЫ ЗДЕСЬ)
+├── Dockerfile                 # Сборка образа
+├── package.json               # Зависимости
+└── smoke.sh                   # Smoke-тесты
 ```
 
 ### 3.2 Контейнер `zap_app`
 ```bash
 docker run -d \
-  --name zap_app \
-  --network prostors-saas_prostors_net \
-  --memory=192m \
-  --memory-swap=192m \
-  --log-opt max-size=10m \
-  --log-opt max-file=2 \
-  --restart=unless-stopped \
-  --env-file .env \
-  -v /root/zapdemo/data:/app/data \
-  zap_app_image
+  --name zap_app \
+  --network prostors-saas_prostors_net \
+  --memory=192m \
+  --memory-swap=192m \
+  --log-opt max-size=10m \
+  --log-opt max-file=2 \
+  --restart=unless-stopped \
+  --env-file .env \
+  -v /root/zapdemo/data:/app/data \
+  zap_app_image
 ```
 
 **Ресурсы:**
@@ -129,23 +134,23 @@ docker run -d \
 ### 3.3 Схема взаимодействия
 ```
 ─────────────────┐
-│  Telegram User  │
+│  Telegram User  │
 └────────────────┘
-         │
-    ────▼─────┐
-    │  Bot API │
-    └────┬─────┘
-         │
-    ┌────▼─────────────────────────────┐
-    │  zap.prostors.ru (nginx:443)     │
-    └────┬─────────────────────────────┘
-         │ proxy_pass http://zap_app:3000
-    ┌────▼─────┐
-    │ zap_app  │
-    │ (Node.js)│
-    └────┬─────┘
-         ├──→ SQLite (/app/data/parts.db)
-         └──→ Telegram Bot (long polling)
+         │
+    ────▼─────┐
+    │  Bot API │
+    └────┬─────┘
+         │
+    ┌────▼─────────────────────────────┐
+    │  zap.prostors.ru (nginx:443)     │
+    └────┬─────────────────────────────┘
+         │ proxy_pass http://zap_app:3000
+    ┌────▼─────┐
+    │ zap_app  │
+    │ (Node.js)│
+    └────┬─────┘
+         ├──→ SQLite (/app/data/parts.db)
+         └──→ Telegram Bot (long polling)
 ```
 
 ---
@@ -169,9 +174,9 @@ docker run -d \
 - ✅ Поиск по артикулу и названию (debounce 300ms)
 - ✅ Отображение товаров (артикул, название, цена, наличие)
 - ✅ API endpoints:
-  - `GET /api/products?q=&category=&brand=&limit=&offset=`
-  - `GET /api/products/categories`
-  - `GET /api/products/brands`
+  - `GET /api/products?q=&category=&brand=&limit=&offset=`
+  - `GET /api/products/categories`
+  - `GET /api/products/brands`
 
 **План (Шаг 4):**
 - 🔲 Фильтры по категории
@@ -193,8 +198,8 @@ docker run -d \
 ### 5.1 Переменные окружения (`.env`)
 ```bash
 PORT=3000
-BOT_TOKEN=<СКРЫТ>  # ⚠️ ТОЛЬКО в .env, НЕ в документации
-ADMIN_PASSWORD=<СКРЫТ>  # ⚠️ Сменить перед передачей (не admin!)
+BOT_TOKEN=<СКРЫТ>  # ⚠️ ТОЛЬКО в .env, НЕ в документации
+ADMIN_PASSWORD=<СКРЫТ>  # ⚠️ Сменить перед передачей (не admin!)
 TG_CHAT_ID=2038206387
 DB_PATH=/app/data/parts.db
 MINI_APP_URL=https://zap.prostors.ru/
@@ -207,19 +212,22 @@ MINI_APP_URL=https://zap.prostors.ru/
 **Таблица `products`:**
 ```sql
 CREATE TABLE products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tenant_id INTEGER DEFAULT 1,
-    article TEXT NOT NULL UNIQUE,
-    name TEXT NOT NULL,
-    category TEXT,
-    brand TEXT,
-    price REAL NOT NULL,
-    stock INTEGER NOT NULL DEFAULT 0,
-    photo_url TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id INTEGER DEFAULT 1,
+    article TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    category TEXT,
+    brand TEXT,
+    price REAL NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
+    car_brand TEXT,
+    photo_url TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_products_article ON products(article);
+CREATE TABLE requests (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT DEFAULT 'vin', vin TEXT, description TEXT, contact TEXT, status TEXT DEFAULT 'new', created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE tenant_config (id INTEGER PRIMARY KEY CHECK (id=1), brand_name TEXT, shop_name TEXT, slogan TEXT, phone TEXT, contact_info TEXT, about TEXT, payment_text TEXT, delivery_text TEXT, hero_url TEXT, color_primary TEXT, color_accent TEXT, car_brands_json TEXT, categories_json TEXT, tg_chat_id INTEGER, admin_password TEXT, updated_at DATETIME);
 ```
 
 **Демо-данные:** 10 товаров (4 категории, 4 бренда)
@@ -229,20 +237,20 @@ CREATE INDEX idx_products_article ON products(article);
 **Требуемый server-блок (только по явной команде владельца):**
 ```nginx
 server {
-    listen 443 ssl;
-    server_name zap.prostors.ru;
-   
-    ssl_certificate /etc/letsencrypt/live/zap.prostors.ru/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/zap.prostors.ru/privkey.pem;
-   
-    location / {
-        proxy_pass http://zap_app:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
+    listen 443 ssl;
+    server_name zap.prostors.ru;
+   
+    ssl_certificate /etc/letsencrypt/live/zap.prostors.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/zap.prostors.ru/privkey.pem;
+   
+    location / {
+        proxy_pass http://zap_app:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
 }
 ```
 
@@ -262,13 +270,13 @@ docker build -t zap_app_image .
 # Пересоздание контейнера
 docker stop zap_app && docker rm zap_app
 docker run -d --name zap_app \
-  --network prostors-saas_prostors_net \
-  --memory=192m --memory-swap=192m \
-  --log-opt max-size=10m --log-opt max-file=2 \
-  --restart=unless-stopped \
-  --env-file .env \
-  -v /root/zapdemo/data:/app/data \
-  zap_app_image
+  --network prostors-saas_prostors_net \
+  --memory=192m --memory-swap=192m \
+  --log-opt max-size=10m --log-opt max-file=2 \
+  --restart=unless-stopped \
+  --env-file .env \
+  -v /root/zapdemo/data:/app/data \
+  zap_app_image
 
 # Проверка
 docker logs zap_app --tail 20
@@ -277,7 +285,7 @@ docker logs zap_app --tail 20
 ### 6.2 Smoke-тесты
 ```bash
 # API health
-curl http://zap_app:3000/health  # через сеть, НЕ localhost
+curl http://zap_app:3000/health  # через сеть, НЕ localhost
 
 # API products
 curl "http://zap_app:3000/api/products?limit=3"
@@ -317,10 +325,10 @@ docker restart zap_app
 **Ветка 2 "Передача":**
 - Разово: 60–100к ₽
 - Передается:
-  - GitHub-репозиторий
-  - SQLite-файл с данными
-  - `.env` (с его доменом и ботом)
-  - README (pm2 start, git pull, бэкап)
+  - GitHub-репозиторий
+  - SQLite-файл с данными
+  - `.env` (с его доменом и ботом)
+  - README (pm2 start, git pull, бэкап)
 - Владелец: знакомый (сам хостит)
 
 ### 7.2 Расходы клиента (при передаче)
@@ -339,7 +347,7 @@ docker restart zap_app
 - ✅ **Шаг 2:** Создание zap_app — выполнено
 - ✅ **Шаг 3:** Бот работает (отвечает на `/start`)
 - ✅ **Шаг 4 (частично):** API работает, демо-данные загружены
-- 🟡 **Mini App:** ошибка DNS (`zap.prostors.ru` не резолвится) — требует DNS + SSL + nginx
+✅ Mini App: zap.prostors.ru — HTTP/2 200 (DNS+SSL+nginx выполнены)
 - 🔲 **Шаг 5:** Админка, VIN, импорт — не реализовано
 
 ### 8.2 Блокеры
@@ -358,10 +366,10 @@ docker restart zap_app
 ## §9. ПЛАН РАЗВИТИЯ
 
 ### 9.1 Немедленно (после DNS)
-1. ⬜ Владелец: создать A-запись в reg.ru
-2. 🔲 Qwen: выпустить SSL-сертификат (certbot) — **только по явной команде**
-3. 🔲 Qwen: добавить server-блок в nginx — **только по явной команде**
-4. 🔲 Qwen: протестировать Mini App
+✅ Владелец: A-запись в reg.ru
+✅ Qwen: SSL-сертификат (certbot)
+✅ Qwen: server-блок nginx (по явной команде)
+✅ Qwen: Mini App протестирован
 
 ### 9.2 Шаг 4 (Каталог + фильтры)
 1. 🔲 Фильтры по категории (dropdown)
@@ -443,7 +451,7 @@ docker restart zap_app
 ## §12. КОНТАКТЫ И ДОКУМЕНТАЦИЯ
 
 ### 12.1 Репозиторий
-**Путь:** `/root/zapdemo/` (локально на Beget) 
+**Путь:** `/root/zapdemo/` (локально на Beget) 
 **GitHub:** (создаст владелец при передаче)
 
 ### 12.2 Документация
@@ -476,8 +484,7 @@ docker restart zap_app
 - ✅ НЕ имеет доступа к API ProStors (там авторизация через initData/PIN/токен)
 
 ### 13.4 Nginx/certbot
-- ⚠️ Требует настройки (шаг 4 брифа)
-- ✅ Пока не тронуты
+✅ server-блок zap.prostors.ru добавлен по явной команде (22.08); certbot выполнен
 
 ### 13.5 DNS
 - ⚠️ A-запись `zap.prostors.ru` ещё не создана
@@ -508,9 +515,10 @@ docker restart zap_app
 
 **КОНЕЦ ПАСПОРТА**
 
-*Документ обновлен: 21 августа 2026, 12:30* 
-*Версия: 1.2.0* 
-*Статус: Демо-версия (готовность ~60%)*
+*Документ обновлен: 23 августа 2026* 
+*Версия: 1.4.1* 
+*Статус: Демо готово к редизайну C2 (23.08.2026)*
+✅ C1 (шаблонизация tenant_config) + C2 (редизайн: 4 таба, липкий поиск, бейджи, аналоги, подбор, VIN, Инфо) — задеплоено 23.08
 ## §15. УРОКИ ИТЕРАЦИИ 2 (21.08.2026) — v1.2.0
 
 ### 15.1 Технические уроки (П1–П9)
@@ -530,8 +538,7 @@ docker restart zap_app
 ### 15.3 Далее (Шаг 5 брифа)
 - Админка, импорт Excel, VIN-запросы, TG-пуши, кэш-бастинг ?v=.
 
-## §15. УРОКИ ИТЕРАЦИИ 2 (22.08.2026) — v1.3.0
-
+## 
 ### 15.4 Дельта шага 5 (закрыт)
 - 5.3 Админка: CRUD товаров, заявки+удаление, rate-limit 10/10мин на неверные пароли, вкладки, «Настройки» со сменой телефона/инфо/пароля, кнопки «🔗 Копировать»/«📤 Переслать», «📤 Каталог»
 - 5.4 Импорт Excel: xlsx+multer, INSERT/UPDATE по артикулу, отчёт вставлено/обновлено/ошибки, кнопка «Скачать шаблон»
@@ -546,3 +553,15 @@ docker restart zap_app
 4. Сервер не логирует HTTP-запросы — ground truth только через браузер/curl
 5. DoD до работы; одобрение владельца — один раз на пакет
 6. UI: не резать картинку — подбирать формат (4:5) и резиновые единицы (vh/vw/clamp)
+15.6 Вердикт куратора (23.08):
+- Пароли/секреты НЕ в HTTP-заголовках: логин = POST-тело → HMAC-токен в заголовке (паттерн ProStors)
+- master-passphrase (unicode в заголовке) = known-broken до Auth-2026
+- Пакет Auth-2026 — СТРОГО перед пакетом B (передача); DoD — куратору до работы
+- Урок master-401: unicode в заголовке = ломаный класс транспорта
+15.7 Уроки C2 (23.08):
+- [hidden] перебивается авторским display:flex — всегда [hidden]{display:none!important}
+- /api/products возвращает {items:[...]} — проверять форму ответа API ДО написания фронтенда
+- не усложнять: несколько правок = один sed -e
+- правка фронтенда в терминале — только по прямой команде владельца (иначе FM)
+- белый экран телефона: блокирующий внешний скрипт — только defer+guard (паттерн ProStors §0.6)
+- веб t.me на телефоне грузится медленно; ссылка корректна (HTTP/2 200) — не код
