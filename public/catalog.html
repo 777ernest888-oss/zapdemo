@@ -109,7 +109,7 @@ img.photo{object-fit:cover;display:block}
 <section id="t-vin" hidden>
 <form onsubmit="sendVin(event)">
 <input id="v_vin" placeholder="VIN (необязательно)">
-<textarea id="v_desc" rows="3" placeholder="Что нужно? Например: бампер передний" required></textarea>
+<textarea id="v_desc" rows="3" maxlength="100" placeholder="Что нужно? (до 100 знаков)" required></textarea>
 <input id="v_contact" placeholder="Контакт (телефон или @telegram)" required>
 <button>Отправить запрос</button>
 </form>
@@ -133,7 +133,7 @@ img.photo{object-fit:cover;display:block}
 <div id="m_term" style="font-size:13px;color:#666"></div>
 <div><button id="m_ask" class="mbtn" style="border:none;cursor:pointer" onclick="document.getElementById('ask_box').hidden=false">📨 Отправить запрос</button><button class="mbtn" onclick="copyLink()">🔗 Ссылка</button><button class="mbtn" style="background:#888" onclick="document.getElementById('modal').hidden=true">Закрыть</button></div>
 <h4 style="margin:12px 0 4px">Аналоги (не дороже)</h4>
-<div id="m_an"></div><div id="m_desc" style="font-size:13px;color:#555;margin:8px 0"></div><div id="ask_box" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:6px"><input id="a_contact" placeholder="Ваш телефон или @telegram" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_note" placeholder="Комментарий (необязательно)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><button class="mbtn" style="border:none;cursor:pointer" onclick="sendAsk()">Отправить запрос</button></div>
+<div id="m_an"></div><div id="m_desc" style="font-size:13px;color:#555;margin:8px 0"></div><div id="ask_box" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:6px"><input id="a_contact" placeholder="Ваш телефон или @telegram" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_note" maxlength="30" placeholder="Комментарий (до 30 знаков)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><button class="mbtn" style="border:none;cursor:pointer" onclick="sendAsk()">Отправить запрос</button></div>
 </div>
 </div>
 <div id="toast"></div>

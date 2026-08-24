@@ -16,8 +16,8 @@ function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 var lines=['📨 <b>Запрос #'+r.lastInsertRowid+'</b>','────────────'];
 if(vin)lines.push('🆔 VIN: <code>'+esc(vin)+'</code>');
 if(prod)lines.push('📦 '+esc(prod));
-if(note)lines.push('💬 '+esc(note));
-if(!prod&&d)lines.push('📋 '+esc(d));
+note=note.slice(0,30);if(note)lines.push('💬 '+esc(note));
+if(!prod&&d)lines.push('📋 '+esc(d.slice(0,100)));
 lines.push('📱 '+esc(contact||'—'));
 sendNotification(lines.join('\n'));
 res.json({ ok: true, id: r.lastInsertRowid });
