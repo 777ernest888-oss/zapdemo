@@ -10,6 +10,7 @@ const settings = require('./routes/settings');
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
+app.use('/uploads', express.static('/app/data/uploads'));
 app.use('/api/products', products);
 app.use('/api/requests', requests);
 app.use('/api/settings', settings);

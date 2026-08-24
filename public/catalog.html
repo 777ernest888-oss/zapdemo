@@ -9,56 +9,85 @@
 :root{--primary:#667eea;--accent:#764ba2}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-[hidden]{display:none!important}
-body{margin:0;font-family:system-ui;background:#f5f5f5;padding:0 0 64px}
-header{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,var(--primary),var(--accent));padding:8px 10px;color:#fff}
-#shop{font-weight:700;font-size:15px;margin-bottom:6px}
-#q{width:100%;padding:10px 12px;border:none;border-radius:10px;font-size:15px}
-#upd{font-size:11px;opacity:.85;margin-top:4px}
-.filters{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px}
-.filters select,.filters label{font-size:13px;padding:6px 8px;border-radius:8px;border:1px solid #ddd;background:#fff}
+body{margin:0;font-family:system-ui;background:#f5f6fa}
+header.top{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.shop{padding:10px 12px 4px;font-weight:800;font-size:17px}
+.tabs{display:flex}
+.tabs button{flex:1;padding:10px 2px 8px;border:none;background:none;color:rgba(255,255,255,.75);font-size:12px;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button.on{color:#fff;font-weight:800;border-bottom-color:#ffd700}
+.searchbox{position:sticky;top:0;z-index:19;padding:8px 10px;background:linear-gradient(135deg,var(--primary),var(--accent))}
+#q{width:100%;padding:11px 14px;border:none;border-radius:12px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+#upd{font-size:11px;color:#fff;opacity:.85;margin-top:5px}
+.brands{display:flex;gap:8px;overflow-x:auto;padding:10px 10px 4px;-webkit-overflow-scrolling:touch}
+.brands div{flex:0 0 auto;background:#fff;border:1px solid #e3e4ea;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
+.brands div.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px}
+.filters select,.filters label{font-size:13px;padding:7px 8px;border-radius:10px;border:1px solid #ddd;background:#fff}
 .filters label{display:flex;align-items:center;gap:4px}
-.card{background:#fff;border-radius:12px;margin:8px 10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.card .name{font-size:15px;font-weight:600}
-.card .art{font-size:12px;color:#888}
-.card .row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
-.price{font-size:18px;font-weight:800}
-.badge{font-size:11px;padding:3px 8px;border-radius:20px;color:#fff}
-.b-in{background:#2e9e44}.b-out{background:#e6a000}
-#more{display:block;margin:10px auto;padding:10px 20px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:14px}
-nav.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #ddd;z-index:6}
-nav.tabs button{flex:1;padding:12px 0;border:none;background:none;font-size:12px;color:#555}
-nav.tabs button.on{color:var(--primary);font-weight:700}
-section{min-height:60vh}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;display:flex;align-items:flex-end}
-.mbox{background:#fff;width:100%;max-height:85vh;overflow:auto;border-radius:16px 16px 0 0;padding:14px}
-.mbox h3{margin:0 0 6px}
-.mrow{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
-.mbtn{display:inline-block;margin:4px 6px 4px 0;padding:10px 14px;border:none;border-radius:10px;font-size:14px;text-decoration:none;color:#fff;background:var(--primary)}
-.an{padding:8px;border-top:1px solid #eee;font-size:13px;display:flex;justify-content:space-between}
+#list{padding:4px 10px 20px}
+.card{background:#fff;border-radius:14px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;flex-direction:column;overflow:hidden;cursor:pointer;transition:box-shadow .2s}
+.card:hover{box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.photo{height:110px;display:flex;align-items:center;justify-content:center;font-size:44px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 18%,#fff),color-mix(in srgb,var(--accent) 18%,#fff))}
+.cbody{padding:10px 12px;display:flex;flex-direction:column;flex:1}
+.name{font-size:15px;font-weight:700}
+.art{font-size:12px;color:#8a8f9c;margin-top:2px}
+.brow{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;color:#fff;font-weight:600}
+.b-in{background:#21a04a}.b-out{background:#e6a000}.b-fit{background:#0e7bd1}
+.cfoot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;padding-top:8px}
+.price{font-size:19px;font-weight:900;color:var(--accent)}
+.write{border:none;background:var(--primary);color:#fff;border-radius:10px;padding:8px 12px;font-size:13px;text-decoration:none}
+.skel{border-radius:14px;margin:10px 0;height:150px;background:linear-gradient(90deg,#eee 25%,#f7f7f7 50%,#eee 75%);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+#more{display:block;margin:6px auto 16px;padding:11px 26px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:14px;font-weight:700}
+section{min-height:50vh}
 .sel{padding:10px}
-.sel select{width:100%;padding:10px;margin:6px 0;border-radius:10px;border:1px solid #ddd;font-size:15px}
-.catbtn{display:inline-block;margin:4px;padding:10px 14px;border-radius:10px;background:var(--primary);color:#fff;border:none;font-size:14px}
+.sel select{width:100%;padding:11px;margin:5px 0;border-radius:12px;border:1px solid #ddd;font-size:15px;background:#fff}
+.catbtn{display:inline-block;margin:4px;padding:10px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;font-weight:600}
+.gar{background:#fff;border-radius:12px;padding:10px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.gar button{border:none;background:#e74c3c;color:#fff;border-radius:8px;padding:5px 10px}
 form{padding:10px;display:flex;flex-direction:column;gap:8px}
-form input,form textarea{padding:10px;border-radius:10px;border:1px solid #ddd;font-size:15px;font-family:inherit}
-form button{padding:12px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:15px;font-weight:700}
+form input,form textarea{padding:11px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-family:inherit}
+form button{padding:13px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:15px;font-weight:800}
 .info{padding:12px;font-size:15px}
-.info div{background:#fff;border-radius:10px;margin:6px 0;padding:10px}
-#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;display:none;z-index:20}
+.info div{background:#fff;border-radius:12px;margin:6px 0;padding:11px}
+.mbtn{display:inline-block;margin:4px 6px 4px 0;padding:10px 14px;border:none;border-radius:10px;font-size:14px;text-decoration:none;color:#fff;background:var(--primary)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30;display:flex;align-items:flex-end}
+.mbox{background:#fff;width:100%;max-height:85vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px}
+.mrow{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.an{padding:9px;border-top:1px solid #eee;font-size:13px;display:flex;justify-content:space-between;cursor:pointer}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:9px 18px;border-radius:22px;font-size:13px;display:none;z-index:40}
+@media(min-width:768px){
+.shop{font-size:22px}
+.tabs button{font-size:15px;padding:14px 4px 10px}
+#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding:12px 20px 30px}
+.card{margin:0;flex-direction:row;min-height:170px}
+.photo{height:auto;width:150px;flex:0 0 150px;font-size:56px}
+.price{font-size:22px}
+.modal{align-items:center}
+.mbox{max-width:640px;margin:auto;border-radius:18px}
+}
+img.photo{object-fit:cover}
+img.photo{object-fit:cover;display:block}
 </style>
 </head>
 <body>
-<header>
-<div id="shop">Каталог</div>
-<input id="q" placeholder="Артикул или название…">
-<div id="upd"></div>
+<header class="top">
+<div class="shop" id="shop">Каталог</div>
+<nav class="tabs">
+<button class="on" onclick="tab('catalog',this)">🛒 Каталог</button>
+<button onclick="tab('select',this)">🚗 Подбор</button>
+<button onclick="tab('vin',this)">🔍 VIN</button>
+<button onclick="tab('info',this)">ℹ️ Инфо</button>
+</nav>
+<div class="searchbox"><input id="q" placeholder="Артикул или название…"><div id="upd"></div></div>
 </header>
 <section id="t-catalog">
+<div class="brands" id="brands"></div>
 <div class="filters">
 <label><input type="checkbox" id="f_stock"> Только в наличии</label>
-<select id="f_brand"><option value="">Бренд</option></select>
 <select id="f_cat"><option value="">Категория</option></select>
-<select id="f_car"><option value="">Марка</option></select>
+<select id="f_brand"><option value="">Бренд</option></select>
 <select id="f_sort"><option value="">Сортировка</option><option value="price_asc">Цена ↑</option><option value="price_desc">Цена ↓</option><option value="stock">Сначала в наличии</option></select>
 </div>
 <div id="list"></div>
@@ -66,9 +95,13 @@ form button{padding:12px;border:none;border-radius:10px;background:var(--primary
 </section>
 <section id="t-select" hidden>
 <div class="sel">
-<select id="s_car" onchange="selModel()"><option value="">Марка…</option></select>
-<select id="s_model" onchange="selYear()" hidden><option value="">Модель…</option></select>
-<select id="s_year" onchange="selCats()" hidden><option value="">Год…</option></select>
+<h3 style="margin:4px 0">🚗 Моя машина</h3>
+<select id="s_car"><option value="">Марка…</option></select>
+<select id="s_model" hidden><option value="">Модель…</option></select>
+<select id="s_year" hidden><option value="">Год…</option></select>
+<button class="catbtn" onclick="addCar()">＋ Добавить в гараж</button>
+<div id="garage"></div>
+<h3 style="margin:12px 0 4px">Подбор запчастей</h3>
 <div id="s_cats"></div>
 <div id="s_list"></div>
 </div>
@@ -89,50 +122,58 @@ form button{padding:12px;border:none;border-radius:10px;background:var(--primary
 <div id="i_about"></div>
 <div id="i_pay"></div>
 <div id="i_del"></div>
-<a id="i_write" class="mbtn">✈️ Написать</a>
+<a id="i_call" class="mbtn">📞 Позвонить</a>
 </div>
 </section>
-<nav class="tabs">
-<button class="on" onclick="tab('catalog',this)">Каталог</button>
-<button onclick="tab('select',this)">Подбор</button>
-<button onclick="tab('vin',this)">VIN</button>
-<button onclick="tab('info',this)">Инфо</button>
-</nav>
 <div id="modal" class="modal" hidden onclick="if(event.target===this)this.hidden=true">
 <div class="mbox">
-<h3 id="m_name"></h3>
+<h3 id="m_name" style="margin:0 0 6px"></h3>
 <div id="m_art" class="art"></div>
 <div class="mrow"><span id="m_price" class="price"></span><span id="m_badge"></span></div>
 <div id="m_term" style="font-size:13px;color:#666"></div>
-<div><a id="m_write" class="mbtn">✈️ Написать</a><button class="mbtn" onclick="copyLink()">🔗 Ссылка</button><button class="mbtn" style="background:#888" onclick="document.getElementById('modal').hidden=true">Закрыть</button></div>
+<div><button id="m_ask" class="mbtn" style="border:none;cursor:pointer" onclick="document.getElementById('ask_box').hidden=false">📨 Отправить запрос</button><button class="mbtn" onclick="copyLink()">🔗 Ссылка</button><button class="mbtn" style="background:#888" onclick="document.getElementById('modal').hidden=true">Закрыть</button></div>
 <h4 style="margin:12px 0 4px">Аналоги (не дороже)</h4>
-<div id="m_an"></div>
+<div id="m_an"></div><div id="m_desc" style="font-size:13px;color:#555;margin:8px 0"></div><div id="ask_box" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:6px"><input id="a_contact" placeholder="Ваш телефон или @telegram" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_note" placeholder="Комментарий (необязательно)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><button class="mbtn" style="border:none;cursor:pointer" onclick="sendAsk()">Отправить запрос</button></div>
 </div>
 </div>
 <div id="toast"></div>
 <script>
-var CFG={},PRODS=[],shown=20,cur=null;
+var CFG={},PRODS=[],shown=20,cur=null,GAR=JSON.parse(localStorage.getItem('garage')||'[]');
 function $(i){return document.getElementById(i);}
 function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
-function badge(p){return p.stock>0?'<span class="badge b-in">В наличии</span>':'<span class="badge b-out">Под заказ (3–5 дн.)</span>';}
-function card(p){return '<div class="card" onclick="openP('+p.id+')"><div class="name">'+p.name+'</div><div class="art">'+p.article+(p.car_brand?' · '+p.car_brand:'')+'</div><div class="row"><span class="price">'+p.price+' ₽</span>'+badge(p)+'</div></div>';}
-function tab(t,btn){var s=document.querySelectorAll('section');for(var i=0;i<s.length;i++)s[i].hidden=true;$('t-'+t).hidden=false;var b=document.querySelectorAll('nav.tabs button');for(var i=0;i<b.length;i++)b[i].className='';btn.className='on';}
-function render(){var q=$('q').value.trim().toLowerCase();var l=PRODS.filter(function(p){if(q&&(p.article||'').toLowerCase().indexOf(q)<0&&(p.name||'').toLowerCase().indexOf(q)<0)return false;if($('f_stock').checked&&p.stock<=0)return false;if($('f_brand').value&&p.brand!==$('f_brand').value)return false;if($('f_cat').value&&p.category!==$('f_cat').value)return false;if($('f_car').value&&p.car_brand!==$('f_car').value)return false;return true;});var s=$('f_sort').value;if(s==='price_asc')l.sort(function(a,b){return a.price-b.price;});if(s==='price_desc')l.sort(function(a,b){return b.price-a.price;});if(s==='stock')l.sort(function(a,b){return b.stock-a.stock;});var h='';for(var i=0;i<Math.min(shown,l.length);i++)h+=card(l[i]);$('list').innerHTML=h||'<div class="info">Ничего не найдено</div>';$('more').style.display=l.length>shown?'block':'none';}
-function openP(id){var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];if(!p)return;cur=p;$('m_name').textContent=p.name;$('m_art').textContent=p.article;$('m_price').textContent=p.price+' ₽';$('m_badge').innerHTML=badge(p);$('m_term').textContent=p.stock>0?'Отгрузка сегодня':'Срок поставки 3–5 дней';tgLink($('m_write'));fetch('/api/analogs/'+id).then(function(r){return r.json();}).then(function(a){var h='';for(var i=0;i<a.length;i++)h+='<div class="an" onclick="openP('+a[i].id+')"><span>'+a[i].name+'</span><b>'+a[i].price+' ₽</b></div>';$('m_an').innerHTML=h||'<div style="font-size:13px;color:#888">Нет аналогов</div>';});$('modal').hidden=false;}
-function tgLink(el){var m=(CFG.contact_info||'').match(/@([A-Za-z0-9_]+)/);el.href=m?('https://t.me/'+m[1]):'#';el.target='_blank';}
-function copyLink(){if(cur&&navigator.clipboard){navigator.clipboard.writeText(location.origin+'/catalog.html?v=7#p'+cur.id);toast('Ссылка скопирована');}}
-function sendVin(e){e.preventDefault();var b={vin:$('v_vin').value.trim(),description:$('v_desc').value.trim(),contact:$('v_contact').value.trim()};fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){$('vin_msg').innerHTML='<div>✅ Запрос отправлен. Ответим в ближайшее время.</div>';setTimeout(function(){document.getElementById('vin_msg').innerHTML='';},4000);$('v_vin').value='';$('v_desc').value='';$('v_contact').value='';toast('Запрос отправлен');}else{$('vin_msg').innerHTML='<div>❌ '+(d.error||'Ошибка отправки')+'</div>';}}).catch(function(){$('vin_msg').innerHTML='<div>❌ Ошибка отправки</div>';});}
-function fillSel(sel,vals){var h='<option value="">'+sel.options[0].textContent+'</option>';for(var i=0;i<vals.length;i++)h+='<option>'+vals[i]+'</option>';sel.innerHTML=h;}
+function emo(c){var m={'Масла':'🛢️','Фильтры':'🌀','Тормоза':'🛑','Подвеска':'🔩','Электрика':'⚡','Кузов':'🚗'};return m[c]||'📦';}
+function fits(p){for(var i=0;i<GAR.length;i++)if(GAR[i].brand===p.car_brand&&GAR[i].model===p.model)return true;return false;}
+function badge(p){var h=p.stock>0?'<span class="badge b-in">В наличии</span>':'<span class="badge b-out">Под заказ (3–5 дн.)</span>';if(fits(p))h+='<span class="badge b-fit">✓ Подойдёт</span>';return h;}
+function photoHtml(p){return p.photo_url?'<img class="photo" src="'+p.photo_url+'" alt="">':'<div class="photo">'+emo(p.category)+'</div>';}
+function card(p){return '<div class="card" onclick="openP('+p.id+')">'+photoHtml(p)+'<div class="cbody"><div class="name">'+p.name+'</div><div class="art">'+p.article+(p.car_brand?' · '+p.car_brand+' '+ (p.model||''):'')+'</div><div class="brow">'+badge(p)+'</div><div class="cfoot"><span class="price">'+p.price+' ₽</span></div></div></div>';}
+function tab(t,btn){var s=document.querySelectorAll('section');for(var i=0;i<s.length;i++)s[i].hidden=true;$('t-'+t).hidden=false;var b=document.querySelectorAll('.tabs button');for(var i=0;i<b.length;i++)b[i].className='';btn.className='on';}
+function render(){var q=$('q').value.trim().toLowerCase();var l=PRODS.filter(function(p){if(q&&(p.article||'').toLowerCase().indexOf(q)<0&&(p.name||'').toLowerCase().indexOf(q)<0)return false;if($('f_stock').checked&&p.stock<=0)return false;if($('f_brand').value&&p.brand!==$('f_brand').value)return false;if($('f_cat').value&&p.category!==$('f_cat').value)return false;if(fCar&&p.car_brand!==fCar)return false;return true;});var s=$('f_sort').value;if(s==='price_asc')l.sort(function(a,b){return a.price-b.price;});if(s==='price_desc')l.sort(function(a,b){return b.price-a.price;});if(s==='stock')l.sort(function(a,b){return b.stock-a.stock;});var h='';for(var i=0;i<Math.min(shown,l.length);i++)h+=card(l[i]);$('list').innerHTML=h||'<div class="info">Ничего не найдено</div>';$('more').style.display=l.length>shown?'block':'none';}
+var fCar='';
+function pickBrand(el,b){fCar=(fCar===b)?'':b;var d=document.querySelectorAll('.brands div');for(var i=0;i<d.length;i++)d[i].className='';if(fCar)el.className='on';render();}
+function openP(id){var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];if(!p)return;cur=p;$('m_name').textContent=p.name;$('m_art').textContent=p.article;$('m_price').textContent=p.price+' ₽';$('m_badge').innerHTML=badge(p);$('m_term').textContent=p.stock>0?'Отгрузка сегодня':'Срок поставки 3–5 дней';/*m_write removed*/fetch('/api/analogs/'+id).then(function(r){return r.json();}).then(function(a){var h='';for(var i=0;i<a.length;i++)h+='<div class="an" onclick="openP('+a[i].id+')"><span>'+a[i].name+'</span><b>'+a[i].price+' ₽</b></div>';$('m_an').innerHTML=h||'<div style="font-size:13px;color:#888">Нет аналогов</div>';$('m_desc').textContent=p.description||'';});$('modal').hidden=false;}
+function tgLink(el){var m=(CFG.contact_info||'').match(/@([A-Za-z0-9_]+)/);el.href=m?('https://t.me/'+m[1]):'#';el.target='_blank';return true;}
+function copyLink(){if(cur&&navigator.clipboard){navigator.clipboard.writeText(location.origin+'/catalog.html?v=11#p'+cur.id);toast('Ссылка скопирована');}}
+function sendVin(e){e.preventDefault();var b={vin:$('v_vin').value.trim(),description:$('v_desc').value.trim(),contact:$('v_contact').value.trim()};fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){$('vin_msg').innerHTML='<div>✅ Запрос отправлен. Ответим в ближайшее время.</div>';$('v_vin').value='';$('v_desc').value='';$('v_contact').value='';toast('Запрос отправлен');setTimeout(function(){$('vin_msg').innerHTML='';},4000);}else{$('vin_msg').innerHTML='<div>❌ '+(d.error||'Ошибка отправки')+'</div>';}}).catch(function(){$('vin_msg').innerHTML='<div>❌ Ошибка отправки</div>';});}
 function dvals(f){var m={};for(var i=0;i<PRODS.length;i++){var v=f(PRODS[i]);if(v)m[v]=1;}return Object.keys(m).sort();}
-function selModel(){var c=$('s_car').value;$('s_model').hidden=!c;$('s_year').hidden=true;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!c)return;fillSel($('s_model'),dvals(function(p){return p.car_brand===c?p.model:null;}));}
-function selYear(){var c=$('s_car').value,m=$('s_model').value;$('s_year').hidden=!m;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!m)return;fillSel($('s_year'),dvals(function(p){return p.car_brand===c&&p.model===m?p.year:null;}));}
+function fillSel(sel,vals){var h='<option value="">'+sel.options[0].textContent+'</option>';for(var i=0;i<vals.length;i++)h+='<option>'+vals[i]+'</option>';sel.innerHTML=h;}
+function selModel(){var c=$('s_car').value;$('s_model').hidden=!c;$('s_year').hidden=true;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!c)return;fillSel($('s_model'),dvals(function(p){return p.car_brand===c?p.model:null;}));$('s_model').onchange=selYear;}
+function selYear(){var c=$('s_car').value,m=$('s_model').value;$('s_year').hidden=!m;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!m)return;fillSel($('s_year'),dvals(function(p){return p.car_brand===c&&p.model===m?p.year:null;}));$('s_year').onchange=selCats;}
 function selCats(){var c=$('s_car').value,m=$('s_model').value,y=$('s_year').value;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!y)return;var cats=dvals(function(p){return p.car_brand===c&&p.model===m&&p.year===y?p.category:null;});var h='';for(var i=0;i<cats.length;i++)h+='<button class="catbtn" onclick="selList(\''+cats[i].replace(/'/g,"\\'")+'\')">'+cats[i]+'</button>';$('s_cats').innerHTML=h;}
 function selList(cat){var c=$('s_car').value,m=$('s_model').value,y=$('s_year').value;var l=PRODS.filter(function(p){return p.car_brand===c&&p.model===m&&p.year===y&&p.category===cat;});var h='';for(var i=0;i<l.length;i++)h+=card(l[i]);$('s_list').innerHTML=h;}
-fetch('/api/config').then(function(r){return r.json();}).then(function(c){CFG=c;if(c.shop_name)$('shop').textContent=c.shop_name;if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);$('upd').textContent='Наличие обновлено: '+(c.updated_at||'').slice(0,10);var ph=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean);$('i_phone').innerHTML=ph.map(function(x){return '<a href="tel:'+x.replace(/[^0-9+]/g,'')+'" style="display:block;margin:2px 0">📞 '+x+'</a>';}).join('');
-fetch('/api/products?limit=1000').then(function(r){return r.json();}).then(function(a){PRODS=a.items||a;render();});
+function addCar(){var b=$('s_car').value,m=$('s_model').value,y=$('s_year').value;if(!b||!m){toast('Выберите марку и модель');return;}GAR.push({brand:b,model:m,year:y});localStorage.setItem('garage',JSON.stringify(GAR));renderGarage();render();toast('Машина добавлена: '+b+' '+m);}
+function rmCar(i){GAR.splice(i,1);localStorage.setItem('garage',JSON.stringify(GAR));renderGarage();render();}
+function renderGarage(){var h='';for(var i=0;i<GAR.length;i++)h+='<div class="gar"><span>🚗 '+GAR[i].brand+' '+GAR[i].model+(GAR[i].year?' '+GAR[i].year:'')+'</span><button onclick="rmCar('+i+')">✕</button></div>';$('garage').innerHTML=h;}
+fetch('/api/config').then(function(r){return r.json();}).then(function(c){CFG=c;if(c.shop_name)$('shop').textContent=c.shop_name;if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);$('upd').textContent='Наличие обновлено: '+(c.updated_at||'').slice(0,10);var ph=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean);$('i_phone').innerHTML=ph.map(function(x){return '<a href="tel:'+x.replace(/[^0-9+]/g,'')+'" style="display:block;margin:2px 0">📞 '+x+'</a>';}).join('');$('i_contact').textContent=c.contact_info||'';$('i_about').textContent=c.about||'';$('i_pay').textContent='💳 '+(c.payment_text||'');$('i_del').textContent='🚚 '+(c.delivery_text||'');var ph0=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean)[0];if(ph0)$('i_call').href='tel:'+ph0.replace(/[^0-9+]/g,'');});
+$('list').innerHTML='<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+fetch('/api/products?limit=1000').then(function(r){return r.json();}).then(function(a){PRODS=a.items||a;var bs=dvals(function(p){return p.car_brand;});var h='';for(var i=0;i<bs.length;i++)h+='<div onclick="pickBrand(this,\''+bs[i].replace(/'/g,"\\'")+'\')">'+bs[i]+'</div>';$('brands').innerHTML=h;fillSel($('f_cat'),dvals(function(p){return p.category;}));fillSel($('f_brand'),dvals(function(p){return p.brand;}));fillSel($('s_car'),bs);renderGarage();render();});
 $('q').oninput=function(){render();};
-$('f_stock').onchange=render;$('f_brand').onchange=render;$('f_cat').onchange=render;$('f_car').onchange=render;$('f_sort').onchange=render;
+$('f_stock').onchange=render;$('f_brand').onchange=render;$('f_cat').onchange=render;$('f_sort').onchange=render;
 if(window.Telegram)Telegram.WebApp.ready();
+
+function askP(id){openP(id);setTimeout(function(){var b=document.getElementById('ask_box');if(b)b.hidden=false;},100);}
+function sendAsk(){var c=document.getElementById('a_contact').value.trim();if(!c){toast('Укажите контакт');return;}var n=document.getElementById('a_note').value.trim();var b={vin:'',description:'Запрос по товару: '+(cur?cur.article+' '+cur.name:'')+(n?' — '+n:''),contact:c};fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){toast('✅ Запрос отправлен владельцу');document.getElementById('ask_box').hidden=true;document.getElementById('a_contact').value='';document.getElementById('a_note').value='';}else{toast('❌ '+(d.error||'Ошибка'));}});}
+
+/*op_wrap*/var _op=window.openP;window.openP=function(id){_op(id);var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];var md=document.getElementById('m_desc');if(md){md.textContent=(p&&p.description)||'';md.style.display=(p&&p.description)?'block':'none';}};
 </script>
 </body>
 </html>

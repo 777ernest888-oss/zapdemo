@@ -47,7 +47,7 @@ try {
 const b = req.body;
 if (!b.article || !b.name || b.price === null || b.price === undefined || isNaN(Number(b.price))) return res.status(400).json({ error: 'article, name, price required' });
 const stock = (b.stock === null || b.stock === '' || isNaN(Number(b.stock))) ? 0 : Number(b.stock);
-const r = db.prepare('INSERT INTO products (article, name, category, brand, price, stock, car_brand, photo_url) VALUES (?,?,?,?,?,?,?,?)').run(String(b.article).trim(), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, b.car_brand || null, b.photo_url || null);
+const r = db.prepare('INSERT INTO products (article, name, category, brand, price, stock, car_brand, photo_url, description) VALUES (?,?,?,?,?,?,?,?,?)').run(String(b.article).trim(), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, b.car_brand || null, b.photo_url || null, b.description || null);
 res.json({ ok: true, id: r.lastInsertRowid });
 } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -55,7 +55,7 @@ router.put('/products/:id', function (req, res) {
 try {
 const b = req.body;
 const stock = (b.stock === null || b.stock === '' || isNaN(Number(b.stock))) ? 0 : Number(b.stock);
-const r = db.prepare('UPDATE products SET article=?, name=?, category=?, brand=?, price=?, stock=?, car_brand=?, photo_url=? WHERE id=?').run(String(b.article).trim(), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, b.car_brand || null, b.photo_url || null, Number(req.params.id));
+const r = db.prepare('UPDATE products SET article=?, name=?, category=?, brand=?, price=?, stock=?, car_brand=?, photo_url=?, description=? WHERE id=?').run(String(b.article).trim(), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, b.car_brand || null, b.photo_url || null, b.description || null, Number(req.params.id));
 res.json({ ok: true, changed: r.changes });
 } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -167,4 +167,10 @@ try {
 db.prepare("UPDATE tenant_config SET shop_name='Автозапчасти', slogan='Запчасти для любых китайских авто', hero_url='/images/hero.jpg', color_primary='#667eea', color_accent='#764ba2', payment_text='Оплата переводом на карту', delivery_text='Самовывоз + доставка по городу', car_brands_json='[\"Chery\",\"Haval\",\"Geely\",\"Changan\",\"Omoda\"]', categories_json='[\"Фильтры\",\"Тормоза\",\"Подвеска\",\"Электрика\",\"Кузов\"]', updated_at=CURRENT_TIMESTAMP WHERE id=1").run();
 res.json({ ok: true });
 } catch (e) { res.status(500).json({ error: e.message }); }
+});
+const upl = multer.diskStorage({ destination: function (req, file, cb) { cb(null, '/app/data/uploads'); }, filename: function (req, file, cb) { cb(null, Date.now() + '-' + file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')); } });
+const up = multer({ storage: upl, limits: { fileSize: 5 * 1024 * 1024 } });
+router.post('/upload', up.single('photo'), function (req, res) {
+try { if (!req.file) return res.status(400).json({ error: 'no file' }); res.json({ url: '/uploads/' + req.file.filename }); }
+catch (e) { res.status(500).json({ error: e.message }); }
 });
