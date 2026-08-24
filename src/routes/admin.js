@@ -143,3 +143,26 @@ db.prepare('UPDATE tenant_config SET shop_name=?, slogan=?, phone=?, contact_inf
 res.json({ ok: true });
 } catch (e) { res.status(500).json({ error: e.message }); }
 });
+const fs = require('fs');
+const BACKUP_DIR = process.env.BACKUP_DIR || '/app/backups';
+router.get('/backups', function (req, res) {
+try { res.json({ files: fs.readdirSync(BACKUP_DIR).filter(function (f) { return f.endsWith('.db'); }).sort() }); }
+catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.post('/restore', function (req, res) {
+try {
+const f = String(req.body.file || '');
+if (!/^[a-zA-Z0-9._-]+\.db$/.test(f)) return res.status(400).json({ error: 'bad file name' });
+const src = BACKUP_DIR + '/' + f;
+if (!fs.existsSync(src)) return res.status(404).json({ error: 'not found' });
+fs.copyFileSync(src, process.env.DB_PATH || '/app/data/parts.db');
+res.json({ ok: true });
+setTimeout(function () { process.exit(0); }, 300);
+} catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.post('/reset-settings', function (req, res) {
+try {
+db.prepare("UPDATE tenant_config SET shop_name='Автозапчасти', slogan='Запчасти для любых китайских авто', hero_url='/images/hero.jpg', color_primary='#667eea', color_accent='#764ba2', payment_text='Оплата переводом на карту', delivery_text='Самовывоз + доставка по городу', car_brands_json='[\"Chery\",\"Haval\",\"Geely\",\"Changan\",\"Omoda\"]', categories_json='[\"Фильтры\",\"Тормоза\",\"Подвеска\",\"Электрика\",\"Кузов\"]', updated_at=CURRENT_TIMESTAMP WHERE id=1").run();
+res.json({ ok: true });
+} catch (e) { res.status(500).json({ error: e.message }); }
+});
