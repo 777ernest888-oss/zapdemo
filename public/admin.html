@@ -229,6 +229,11 @@ document.body.insertAdjacentHTML('afterbegin','<div style="background:#e6a000;co
 setTimeout(function(){show();},300);
 setTimeout(function(){document.querySelectorAll('button,input,textarea').forEach(function(el){var t=((el.textContent||'')+(el.placeholder||''));if(/Сохранить|Удалить|Импорт|Отменить|Восстановить|Сбросить|Новый пароль/i.test(t))el.disabled=true;});},1200);
 }
+
+if(DEMO){
+document.addEventListener('click',function(e){var el=e.target.closest?e.target.closest('button'):null;if(el&&/Сохранить|Удалить|Импорт|Отменить|Восстановить|Сбросить/.test(el.textContent||'')){e.preventDefault();e.stopPropagation();alert('🔒 Демо-режим: изменения отключены');}},true);
+setInterval(function(){document.querySelectorAll('button').forEach(function(el){if(/Сохранить|Удалить|Импорт|Отменить|Восстановить|Сбросить/.test(el.textContent||'')){el.disabled=true;el.style.opacity=0.5;}});},2000);
+}
 </script>
 </body>
 </html>
