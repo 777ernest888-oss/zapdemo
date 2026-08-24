@@ -76,7 +76,7 @@ img.photo{object-fit:cover;display:block}
 <div class="shop" id="shop">Каталог</div>
 <nav class="tabs">
 <button class="on" onclick="tab('catalog',this)">🛒 Каталог</button>
-<button onclick="tab('select',this)">🚗 Подбор</button>
+<button onclick="tab('select',this)">🚗 По авто</button>
 <button onclick="tab('vin',this)">🔍 VIN</button>
 <button onclick="tab('info',this)">ℹ️ Инфо</button>
 </nav>
@@ -95,7 +95,7 @@ img.photo{object-fit:cover;display:block}
 </section>
 <section id="t-select" hidden>
 <div class="sel">
-<h3 style="margin:4px 0">🚗 Моя машина</h3>
+<div style="font-size:12px;color:#556;margin:6px 2px">Подбор по авто: марка → модель → год. Покажем совместимые запчасти; «Добавить в гараж» сохранит машину, и в каталоге подходящие получат бейдж «✓ Подойдёт».</div><h3 style="margin:4px 0">🚗 Моя машина</h3>
 <select id="s_car"><option value="">Марка…</option></select>
 <select id="s_model" hidden><option value="">Модель…</option></select>
 <select id="s_year" hidden><option value="">Год…</option></select>
@@ -165,7 +165,8 @@ function rmCar(i){GAR.splice(i,1);localStorage.setItem('garage',JSON.stringify(G
 function renderGarage(){var h='';for(var i=0;i<GAR.length;i++)h+='<div class="gar"><span>🚗 '+GAR[i].brand+' '+GAR[i].model+(GAR[i].year?' '+GAR[i].year:'')+'</span><button onclick="rmCar('+i+')">✕</button></div>';$('garage').innerHTML=h;}
 fetch('/api/config').then(function(r){return r.json();}).then(function(c){CFG=c;if(c.shop_name)$('shop').textContent=c.shop_name;if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);$('upd').textContent='Наличие обновлено: '+(c.updated_at||'').slice(0,10);var ph=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean);$('i_phone').innerHTML=ph.map(function(x){return '<a href="tel:'+x.replace(/[^0-9+]/g,'')+'" style="display:block;margin:2px 0">📞 '+x+'</a>';}).join('');$('i_contact').textContent=c.contact_info||'';$('i_about').textContent=c.about||'';$('i_pay').textContent='💳 '+(c.payment_text||'');$('i_del').textContent='🚚 '+(c.delivery_text||'');var ph0=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean)[0];if(ph0)$('i_call').href='tel:'+ph0.replace(/[^0-9+]/g,'');});
 $('list').innerHTML='<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
-fetch('/api/products?limit=1000').then(function(r){return r.json();}).then(function(a){PRODS=a.items||a;var bs=dvals(function(p){return p.car_brand;});var h='';for(var i=0;i<bs.length;i++)h+='<div onclick="pickBrand(this,\''+bs[i].replace(/'/g,"\\'")+'\')">'+bs[i]+'</div>';$('brands').innerHTML=h;fillSel($('f_cat'),dvals(function(p){return p.category;}));fillSel($('f_brand'),dvals(function(p){return p.brand;}));fillSel($('s_car'),bs);renderGarage();render();});
+fetch('/api/products?limit=1000').then(function(r){return r.json();}).then(function(a){PRODS=a.items||a;var bs=dvals(function(p){return p.car_brand;});var h='';for(var i=0;i<bs.length;i++)h+='<div onclick="pickBrand(this,\''+bs[i].replace(/'/g,"\\'")+'\')">'+bs[i]+'</div>';$('brands').innerHTML='<div onclick="pickAll(this)">Все</div>'+h;fillSel($('f_cat'),dvals(function(p){return p.category;}));fillSel($('f_brand'),dvals(function(p){return p.brand;}));fillSel($('s_car'),bs);renderGarage();render();});
+/*sel_hook*/$('s_car').onchange=selModel;
 $('q').oninput=function(){render();};
 $('f_stock').onchange=render;$('f_brand').onchange=render;$('f_cat').onchange=render;$('f_sort').onchange=render;
 if(window.Telegram)Telegram.WebApp.ready();
@@ -174,6 +175,8 @@ function askP(id){openP(id);setTimeout(function(){var b=document.getElementById(
 function sendAsk(){var c=document.getElementById('a_contact').value.trim();if(!c){toast('Укажите контакт');return;}var n=document.getElementById('a_note').value.trim();var b={vin:'',description:'📦 Товар: '+(cur?cur.article+' — '+cur.name:'')+(n?'\n💬 Комментарий: '+n:''),contact:c};fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){toast('✅ Запрос отправлен владельцу');document.getElementById('ask_box').hidden=true;document.getElementById('a_contact').value='';document.getElementById('a_note').value='';}else{toast('❌ '+(d.error||'Ошибка'));}});}
 
 /*op_wrap*/var _op=window.openP;window.openP=function(id){_op(id);var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];var md=document.getElementById('m_desc');if(md){md.textContent=(p&&p.description)||'';md.style.display=(p&&p.description)?'block':'none';}};
+
+function pickAll(el){fCar='';var d=document.querySelectorAll('.brands div');for(var i=0;i<d.length;i++)d[i].className='';render();}
 </script>
 </body>
 </html>
