@@ -59,6 +59,12 @@ button.gray{background:#999}
 <h2>📥 Импорт Excel</h2>
 <input type="file" id="f_file" accept=".xlsx,.xls">
 <button onclick="doImport()">Импортировать</button>
+<div style="margin:10px 0;padding:10px;background:#f5f5f5;border-radius:10px">
+<h3>🔄 Откаты</h3>
+<button onclick="undoImport()">Отменить импорт</button>
+<select id="bk_list" style="margin:0 6px"></select><button onclick="doRestore()">Восстановить из бэкапа</button>
+<button onclick="resetSettings()">Сбросить настройки</button>
+</div>
 <button class="gray" onclick="dlTemplate()">Скачать шаблон</button>
 <div id="imp_rep"></div>
 </div>
@@ -206,6 +212,12 @@ a.click();
 function checkPass(){fetch("/admin/settings",{headers:hdr()}).then(function(r){return r.json();}).then(function(x){document.getElementById("pwbanner").classList.toggle("hide",!!x.has_pass);});}
 function saveS(){var np=document.getElementById("s_pass").value.trim();var np2=document.getElementById("s_pass2").value.trim();if(np){if(np.length<8){msg("Пароль минимум 8 символов",false);return;}if(np!==np2){msg("Пароли не совпадают",false);return;}}var b={brand_name:document.getElementById("s_brand").value,phone:document.getElementById("s_phone").value,contact_info:document.getElementById("s_contact").value,about:document.getElementById("s_about").value};if(np)b.new_password=np;fetch("/admin/settings",{method:"POST",headers:hdr(),body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg("Настройки сохранены",true);document.getElementById("s_pass").value="";document.getElementById("s_pass2").value="";checkPass();}else{msg(d.error||"Ошибка",false);}});}
 if(PASS)show();
+function loadBackups(){fetch('/admin/backups',{headers:{'Content-Type':'application/json','x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(d){var s=document.getElementById('bk_list');if(!s)return;s.innerHTML='';(d.files||[]).forEach(function(f){var o=document.createElement('option');o.value=f;o.textContent=f;s.appendChild(o);});});}
+function undoImport(){if(!confirm('Отменить последний импорт?'))return;fetch('/admin/restore',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS},body:JSON.stringify({file:'pre-import.db'})}).then(function(){msg('Восстановление… контейнер перезапускается',true);setTimeout(function(){location.reload();},5000);});}
+function doRestore(){var f=document.getElementById('bk_list').value;if(!f){msg('Выберите бэкап',false);return;}if(!confirm('Восстановить '+f+'?'))return;fetch('/admin/restore',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS},body:JSON.stringify({file:f})}).then(function(){msg('Восстановление… контейнер перезапускается',true);setTimeout(function(){location.reload();},5000);});}
+function resetSettings(){if(!confirm('Сбросить настройки витрины к дефолту?'))return;fetch('/admin/reset-settings',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(){msg('Настройки сброшены',true);});}
+if(PASS)loadBackups();
+setInterval(function(){if(PASS&&document.getElementById('bk_list')&&document.getElementById('bk_list').options.length===0)loadBackups();},3000);
 </script>
 </body>
 </html>

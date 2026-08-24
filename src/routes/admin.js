@@ -100,7 +100,8 @@ res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spr
 res.send(buf);
 } catch (e) { res.status(500).json({ error: e.message }); }
 });
-router.post('/import-excel', upload.single('file'), function (req, res) {
+router.post('/import-excel', upload.single('file'), async function (req, res) {
+try { await db.backup(BACKUP_DIR + '/pre-import.db'); } catch (e) { console.error('pre-backup', e.message); }
 try {
 if (!req.file) return res.status(400).json({ error: 'file required' });
 const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
