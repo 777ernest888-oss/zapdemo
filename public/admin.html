@@ -82,6 +82,7 @@ button.gray{background:#999}
 <input id="s_pass" type="password" placeholder="Новый пароль (если сменить, мин. 8 символов)">
 <input id="s_pass2" type="password" placeholder="Повторите новый пароль">
 <button onclick="saveS()">Сохранить настройки</button>
+<div id="brand_block" style="margin:12px 0;padding:12px;background:#f5f5f5;border-radius:10px"><h3>🎨 Бренд и внешний вид</h3><input id="b_shop" placeholder="Название магазина" style="width:100%;margin:4px 0"><input id="b_slogan" placeholder="Слоган" style="width:100%;margin:4px 0"><textarea id="b_phone" rows="2" placeholder="Телефоны (по одному в строке)" style="width:100%;margin:4px 0"></textarea><input id="b_hero" placeholder="URL картинки hero" style="width:100%;margin:4px 0"><div style="margin:6px 0">Основной <input type="color" id="b_c1"> Акцентный <input type="color" id="b_c2"></div><button onclick="saveBrand()">Сохранить внешний вид</button></div>
 </div>
 </div>
 <script>
@@ -218,6 +219,9 @@ function doRestore(){var f=document.getElementById('bk_list').value;if(!f){msg('
 function resetSettings(){if(!confirm('Сбросить настройки витрины к дефолту?'))return;fetch('/admin/reset-settings',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(){msg('Настройки сброшены',true);});}
 if(PASS)loadBackups();
 setInterval(function(){if(PASS&&document.getElementById('bk_list')&&document.getElementById('bk_list').options.length===0)loadBackups();},3000);
+function loadBrand(){fetch('/api/config').then(function(r){return r.json();}).then(function(c){window._cfg=c;document.getElementById('b_shop').value=c.shop_name||'';document.getElementById('b_slogan').value=c.slogan||'';document.getElementById('b_phone').value=c.phone||'';document.getElementById('b_hero').value=c.hero_url||'';document.getElementById('b_c1').value=c.color_primary||'#667eea';document.getElementById('b_c2').value=c.color_accent||'#764ba2';});}
+function saveBrand(){var c=window._cfg||{};var b={shop_name:document.getElementById('b_shop').value,slogan:document.getElementById('b_slogan').value,phone:document.getElementById('b_phone').value.split('\n').map(function(x){return x.trim();}).filter(Boolean).join('\n'),contact_info:c.contact_info,about:c.about,payment_text:c.payment_text,delivery_text:c.delivery_text,hero_url:document.getElementById('b_hero').value,color_primary:document.getElementById('b_c1').value,color_accent:document.getElementById('b_c2').value,car_brands:c.car_brands||[],categories:c.categories||[]};fetch('/admin/config',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){alert('Внешний вид сохранён');}else{alert(d.error||'Ошибка');}});}
+if(PASS)loadBrand();
 </script>
 </body>
 </html>
