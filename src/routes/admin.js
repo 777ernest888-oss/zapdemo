@@ -17,6 +17,7 @@ if (row && row.admin_password) return pass === row.admin_password;
 return process.env.ADMIN_PASSWORD ? pass === process.env.ADMIN_PASSWORD : false;
 }
 router.use(function (req, res, next) {
+if (req.get('x-demo') === '1') { if (req.method === 'GET') return next(); return res.status(403).json({ error: 'demo read-only' }); }
 const pass = Buffer.from(req.headers['x-admin-pass'] || '', 'latin1').toString('utf8');
 if (passValid(pass)) return next();
 const ip = req.ip || 'unk';

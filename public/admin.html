@@ -222,6 +222,13 @@ setInterval(function(){if(PASS&&document.getElementById('bk_list')&&document.get
 function loadBrand(){fetch('/api/config').then(function(r){return r.json();}).then(function(c){window._cfg=c;document.getElementById('b_shop').value=c.shop_name||'';document.getElementById('b_slogan').value=c.slogan||'';document.getElementById('b_phone').value=c.phone||'';document.getElementById('b_hero').value=c.hero_url||'';document.getElementById('b_c1').value=c.color_primary||'#667eea';document.getElementById('b_c2').value=c.color_accent||'#764ba2';});}
 function saveBrand(){var c=window._cfg||{};var b={shop_name:document.getElementById('b_shop').value,slogan:document.getElementById('b_slogan').value,phone:document.getElementById('b_phone').value.split('\n').map(function(x){return x.trim();}).filter(Boolean).join('\n'),contact_info:c.contact_info,about:c.about,payment_text:c.payment_text,delivery_text:c.delivery_text,hero_url:document.getElementById('b_hero').value,color_primary:document.getElementById('b_c1').value,color_accent:document.getElementById('b_c2').value,car_brands:c.car_brands||[],categories:c.categories||[]};fetch('/admin/config',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){alert('Внешний вид сохранён');}else{alert(d.error||'Ошибка');}});}
 if(PASS)loadBrand();
+var DEMO=location.search.indexOf('demo=1')>=0;
+if(DEMO){
+var _f=window.fetch;window.fetch=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['x-demo']='1';return _f(u,o);};
+document.body.insertAdjacentHTML('afterbegin','<div style="background:#e6a000;color:#fff;text-align:center;padding:8px;font-weight:700;position:sticky;top:0;z-index:99">🔒 Демо-режим (просмотр). Полный доступ — по паролю.</div>');
+setTimeout(function(){show();},300);
+setTimeout(function(){document.querySelectorAll('button,input,textarea').forEach(function(el){var t=((el.textContent||'')+(el.placeholder||''));if(/Сохранить|Удалить|Импорт|Отменить|Восстановить|Сбросить|Новый пароль/i.test(t))el.disabled=true;});},1200);
+}
 </script>
 </body>
 </html>
