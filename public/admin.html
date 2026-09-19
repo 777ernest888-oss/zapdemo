@@ -26,7 +26,7 @@ button.gray{background:#999}
 <style>body{background:#f2f4f8}input,textarea,select{width:100%;padding:10px 12px;margin:5px 0;border:1px solid #d8dce6;border-radius:10px;font-size:14px;background:#fff}input:focus,textarea:focus{outline:2px solid #667eea}button{border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;background:#667eea;color:#fff;margin:4px 4px 4px 0}h2,h3{letter-spacing:.2px}</style>
 <style>textarea{width:100%!important;box-sizing:border-box;min-height:110px}</style></head>
 <body>
-<div class="nav"><a href="index.html?v=5">← Главная</a><a href="catalog.html?v=5">🛒 Каталог</a></div>
+<div class="nav"><a id="nav_main" href="index.html?v=37">← Главная</a><a id="nav_cat" href="catalog.html?v=37">🛒 Каталог</a></div>
 <h1>⚙️ Админ-панель</h1>
 <div id="login">
 <input id="pass" type="password" placeholder="Пароль администратора">
@@ -34,25 +34,25 @@ button.gray{background:#999}
 <div class="err" id="lerr"></div>
 </div>
 <div id="app" class="hide">
-<div class="mode">Вы в режиме администратора</div>
+<div class="mode">Вы в режиме администратора</div><div id="trial_banner" hidden style="background:#fef3c7;color:#92400e;border-radius:10px;padding:10px;margin:8px 10px;font-weight:600"></div>
 <div id="pwbanner" class="err hide">⚠️ Действует пароль по умолчанию — смените в «Настройках»</div>
 <div>
 <button id="tabP" class="tab active" onclick="tab('p')">📦 Товары</button>
 <button id="tabR" class="tab" onclick="tab('r')">📋 Заявки</button>
 <button id="tabS" class="tab" onclick="tab('s')">⚙️ Настройки</button>
-<button class="gray" onclick="shareCatalog()">📤 Каталог</button>
+<button class="gray" onclick="window.open('catalog.html?v=37&tenant='+TID,'_blank')">📤 Каталог</button> <button class="gray" onclick="shareCatalog()">🔗 Поделиться</button>
 <button class="gray" onclick="logout()">Выход</button>
 </div>
 <div id="msg"></div>
 <div id="sec-p">
 <h2>Новый товар</h2>
-<input id="f_article" placeholder="Артикул *">
+<input id="f_article" placeholder="Артикул (необязательно)">
 <input id="f_name" placeholder="Название *">
 <input id="f_price" type="number" placeholder="Цена *">
 <input id="f_stock" type="number" placeholder="Наличие">
-<input id="f_category" placeholder="Категория">
-<input id="f_brand" placeholder="Бренд">
-<input id="f_car" placeholder="Марка авто">
+<select id="f_category"></select><input id="f_category_new" placeholder="Новая категория — появится в списке после сохранения" style="display:none;margin-top:6px">
+<select id="f_brand"></select><input id="f_brand_new" placeholder="Новый бренд — появится в списке после сохранения" style="display:none;margin-top:6px">
+<select id="f_car"></select><input id="f_car_new" placeholder="Новая марка — появится в списке после сохранения" style="display:none;margin-top:6px"><input id="f_country" placeholder="Страна производитель: Китай, Россия, Германия...">
 <div style="margin:10px 0"><label style="font-weight:700">📷 Фото товара</label> <span style="color:#888;font-size:12px">(файл с ПК/телефона, сожмётся при загрузке)</span><br><input type="file" id="f_file" accept="image/*" style="width:auto;margin:6px 0" onchange="prepPhoto(this)"><br><img id="f_prev" style="max-height:70px;border-radius:8px;margin-top:4px" hidden><input type="hidden" id="f_photo_url"></div><button onclick="saveProd()">Сохранить</button>
 <h2>Список товаров</h2>
 <div id="plist"></div>
@@ -60,7 +60,7 @@ button.gray{background:#999}
 <h2>📥 Импорт Excel</h2>
 <input type="file" id="f_file" accept=".xlsx,.xls">
 <button onclick="doImport()">Импортировать</button>
-<div style="margin:10px 0;padding:10px;background:#f5f5f5;border-radius:10px">
+<div id="otkat" style="margin:10px 0;padding:10px;background:#f5f5f5;border-radius:10px">
 <h3>🔄 Откаты</h3>
 <button onclick="undoImport()">Отменить импорт</button>
 <select id="bk_list" style="margin:0 6px"></select><button onclick="doRestore()">Восстановить из бэкапа</button>
@@ -78,6 +78,7 @@ button.gray{background:#999}
 <h2>Настройки</h2>
 <input id="s_brand" placeholder="Название бренда">
 <input id="s_phone" placeholder="Телефон">
+<input id="s_tg" placeholder="Telegram для заявок (chat id, узнать у @userinfobot)">
 <input id="s_contact" placeholder="Контакты (TG)">
 <input id="s_about" placeholder="О компании">
 <input id="s_pass" type="password" placeholder="Новый пароль (если сменить, мин. 8 символов)">
@@ -89,7 +90,8 @@ button.gray{background:#999}
 <script>
 var PASS=sessionStorage.getItem('apass')||'';
 var editId=null;
-function hdr(){return {'Content-Type':'application/json','x-admin-pass':PASS};}
+var TID=new URLSearchParams(location.search).get('tenant')||'demo';function hdr(){return {'Content-Type':'application/json','x-admin-pass':PASS,'x-tenant-id':TID};}
+document.getElementById('nav_main').href='index.html?v=37&tenant='+TID;document.getElementById('nav_cat').href='catalog.html?v=37&tenant='+TID;
 function doLogin(){
 PASS=document.getElementById('pass').value;
 fetch('/admin/products',{headers:hdr()}).then(function(r){
@@ -108,7 +110,7 @@ document.getElementById('tabR').classList.toggle('active',t=='r');
 document.getElementById('tabS').classList.toggle('active',t=='s');
 if(t=='s')loadS();
 }
-function msg(t,ok){var m=document.getElementById('msg');m.innerHTML='<div class="'+(ok?'ok':'err')+'">'+t+'</div>';setTimeout(function(){m.innerHTML='';},3000);}
+function msg(t,ok){var m=document.getElementById('msg');m.style.cssText='position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);z-index:9999;min-width:240px;max-width:88%;text-align:center;';m.innerHTML='<div style="background:'+(ok?'#dcfce7':'#fee2e2')+';color:'+(ok?'#166534':'#991b1b')+';padding:14px 20px;border-radius:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.2);font-size:15px;">'+t+'</div>';setTimeout(function(){m.innerHTML='';m.style.cssText='';},3500);}
 function clearForm(){
 ['f_article','f_name','f_price','f_stock','f_category','f_brand','f_car'].forEach(function(i){document.getElementById(i).value='';});
 editId=null;
@@ -129,7 +131,7 @@ price:document.getElementById('f_price').value===''?null:Number(document.getElem
 stock:document.getElementById('f_stock').value===''?0:Number(document.getElementById('f_stock').value),
 category:document.getElementById('f_category').value.trim()||null,
 brand:document.getElementById('f_brand').value.trim()||null,
-car_brand:document.getElementById('f_car').value.trim()||null,
+car_brand:document.getElementById('f_car').value.trim()||null, country:document.getElementById('f_country').value.trim(),
 photo_url:document.getElementById('f_photo_url').value||null,
 description:(document.getElementById('f_desc')?document.getElementById('f_desc').value:'')||null
 };
@@ -144,6 +146,7 @@ function delProd(id){
 if(!confirm('Удалить товар?'))return;
 fetch('/admin/products/'+id,{method:'DELETE',headers:hdr()}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg('Удалено',true);loadP();}});
 }
+
 function editProd(id){
 fetch('/admin/products',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
 var p=null;
@@ -156,7 +159,7 @@ document.getElementById('f_price').value=p.price;
 document.getElementById('f_stock').value=p.stock;
 document.getElementById('f_category').value=p.category||'';
 document.getElementById('f_brand').value=p.brand||'';
-document.getElementById('f_car').value=p.car_brand||'';
+document.getElementById('f_car').value=p.car_brand||''; document.getElementById('f_country').value=p.country||'';
 msg('Редактирование #'+id+' — измените и нажмите Сохранить',true);
 window.scrollTo(0,0);
 });
@@ -164,7 +167,7 @@ window.scrollTo(0,0);
 function loadR(){
 fetch('/admin/requests',{headers:hdr()}).then(function(r){return r.json();}).then(function(a){
 document.getElementById('rlist').innerHTML=a.map(function(x){
-return '<div class="card"><div class="row"><b>#'+x.id+'</b> '+x.type+' · '+x.status+'</div><div class="row">VIN: '+(x.vin||'—')+'</div><div class="row">'+x.description+'</div><div class="row">Контакт: '+(x.contact||'—')+'</div><button class="red" onclick="delReq('+x.id+')">Удалить</button></div>';
+return '<div class="card"><div class="row"><b>#'+x.id+'</b> '+x.type+' · '+x.status+'</div><div class="row">VIN: '+(x.vin||'—')+'</div><div class="row">'+x.description+'</div><div class="row">Контакт: '+(x.contact||'—')+' <span class="badge" style="background:'+((x.push_status==='failed')?'#e74c3c':((x.push_status==='sent')?'#27ae60':'#95a5a6'))+'">'+(x.push_status||'—')+'</span></div><button class="red" onclick="delReq('+x.id+')">Удалить</button></div>';
 }).join('')||'<p>Пусто</p>';
 });
 }
@@ -172,20 +175,21 @@ function delReq(id){
 if(!confirm('Удалить заявку?'))return;
 fetch('/admin/requests/'+id,{method:'DELETE',headers:hdr()}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg('Удалено',true);loadR();}});
 }
-function prodUrl(a){return 'https://zap.prostors.ru/catalog.html?article='+encodeURIComponent(a);}
+function prodUrl(a){return 'https://zap.prostors.ru/catalog.html?article='+encodeURIComponent(a)+'&tenant='+TID;}
 function copyLink(a){var u=prodUrl(a);if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){msg('Ссылка скопирована',true);});}else{prompt('Скопируйте ссылку:',u);}}
 function shareTg(a){var u=prodUrl(a);window.open('https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Запчасть: '+a),'_blank');}
-function shareCatalog(){window.open('https://t.me/share/url?url='+encodeURIComponent('https://zap.prostors.ru/catalog.html?v=5')+'&text='+encodeURIComponent('Каталог автозапчастей'),'_blank');}
+function shareCatalog(){window.open('https://t.me/share/url?url='+encodeURIComponent('https://zap.prostors.ru/catalog.html?v=37&tenant='+TID)+'&text='+encodeURIComponent('Каталог автозапчастей'),'_blank');}
 function loadS(){
 fetch('/admin/settings',{headers:hdr()}).then(function(r){return r.json();}).then(function(s){
 document.getElementById('s_brand').value=s.brand_name||'';
-document.getElementById('s_phone').value=s.phone||'';
+document.getElementById('s_phone').value=s.phone||'';document.getElementById('s_tg').value=s.tg_chat_id||'';
+fetch('/admin/config',{headers:hdr()}).then(function(r){return r.json();}).then(function(c){if(c.plan==='trial'){var tb=document.getElementById('trial_banner');tb.hidden=false;tb.textContent='\u{1F552} Тестовый режим до '+String(c.expires_at||'').slice(0,10)+'. Активация подписки: @ernest_812';}});
 document.getElementById('s_contact').value=s.contact_info||'';
 document.getElementById('s_about').value=s.about||'';
 });
 }
 function saveS(){
-var b={brand_name:document.getElementById('s_brand').value,phone:document.getElementById('s_phone').value,contact_info:document.getElementById('s_contact').value,about:document.getElementById('s_about').value};
+var b={brand_name:document.getElementById('s_brand').value,phone:document.getElementById('s_phone').value,tg_chat_id:document.getElementById('s_tg').value,contact_info:document.getElementById('s_contact').value,about:document.getElementById('s_about').value};
 var np=document.getElementById('s_pass').value.trim();
 if(np)b.new_password=np;
 fetch('/admin/settings',{method:'POST',headers:hdr(),body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
@@ -198,7 +202,7 @@ var f=document.getElementById('f_file').files[0];
 if(!f){msg('Выберите файл',false);return;}
 var fd=new FormData();
 fd.append('file',f);
-fetch('/admin/import-excel',{method:'POST',headers:{'x-admin-pass':PASS},body:fd}).then(function(r){return r.json();}).then(function(d){
+fetch('/admin/import-excel',{method:'POST',headers:{'x-admin-pass':PASS,'x-tenant-id':TID},body:fd}).then(function(r){return r.json();}).then(function(d){
 if(d.errors!==undefined){
 document.getElementById('imp_rep').innerHTML='<div class="ok">Вставлено: '+d.inserted+' · Обновлено: '+d.updated+'</div>'+(d.errors.length?'<div class="err">Ошибки: '+d.errors.map(function(e){return 'стр.'+e.row+': '+e.error;}).join('; ')+'</div>':'');
 loadP();
@@ -213,17 +217,17 @@ a.download='template.xlsx';
 a.click();
 });
 }
-function checkPass(){fetch("/admin/settings",{headers:hdr()}).then(function(r){return r.json();}).then(function(x){document.getElementById("pwbanner").classList.toggle("hide",!!x.has_pass);});}
-function saveS(){var np=document.getElementById("s_pass").value.trim();var np2=document.getElementById("s_pass2").value.trim();if(np){if(np.length<8){msg("Пароль минимум 8 символов",false);return;}if(np!==np2){msg("Пароли не совпадают",false);return;}}var b={brand_name:document.getElementById("s_brand").value,phone:document.getElementById("s_phone").value,contact_info:document.getElementById("s_contact").value,about:document.getElementById("s_about").value};if(np)b.new_password=np;fetch("/admin/settings",{method:"POST",headers:hdr(),body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg("Настройки сохранены",true);document.getElementById("s_pass").value="";document.getElementById("s_pass2").value="";checkPass();}else{msg(d.error||"Ошибка",false);}});}
+function checkPass(){fetch("/admin/settings",{headers:hdr()}).then(function(r){return r.json();}).then(function(x){document.getElementById("pwbanner").classList.toggle("hide",!!x.has_pass);var ot=document.getElementById('otkat');if(ot)ot.style.display=x.is_master?'':'none';});}
+function saveS(){var np=document.getElementById("s_pass").value.trim();var np2=document.getElementById("s_pass2").value.trim();if(np){if(np.length<8){msg("Пароль минимум 8 символов",false);return;}if(np!==np2){msg("Пароли не совпадают",false);return;}}var b={brand_name:document.getElementById("s_brand").value,phone:document.getElementById("s_phone").value,tg_chat_id:document.getElementById("s_tg").value,contact_info:document.getElementById("s_contact").value,about:document.getElementById("s_about").value};if(np)b.new_password=np;fetch("/admin/settings",{method:"POST",headers:hdr(),body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){msg("Настройки сохранены",true);document.getElementById("s_pass").value="";document.getElementById("s_pass2").value="";checkPass();}else{msg(d.error||"Ошибка",false);}});}
 if(PASS)show();
-function loadBackups(){fetch('/admin/backups',{headers:{'Content-Type':'application/json','x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(d){var s=document.getElementById('bk_list');if(!s)return;s.innerHTML='';(d.files||[]).forEach(function(f){var o=document.createElement('option');o.value=f;o.textContent=f;s.appendChild(o);});});}
-function undoImport(){if(!confirm('Отменить последний импорт?'))return;fetch('/admin/restore',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS},body:JSON.stringify({file:'pre-import.db'})}).then(function(){msg('Восстановление… контейнер перезапускается',true);setTimeout(function(){location.reload();},5000);});}
-function doRestore(){var f=document.getElementById('bk_list').value;if(!f){msg('Выберите бэкап',false);return;}if(!confirm('Восстановить '+f+'?'))return;fetch('/admin/restore',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS},body:JSON.stringify({file:f})}).then(function(){msg('Восстановление… контейнер перезапускается',true);setTimeout(function(){location.reload();},5000);});}
-function resetSettings(){if(!confirm('Сбросить настройки витрины к дефолту?'))return;fetch('/admin/reset-settings',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(){msg('Настройки сброшены',true);});}
+function loadBackups(){fetch('/admin/backups',{headers:{'Content-Type':'application/json','x-admin-pass':PASS,'x-tenant-id':TID}}).then(function(r){return r.json();}).then(function(d){var s=document.getElementById('bk_list');if(!s)return;s.innerHTML='';(d.files||[]).forEach(function(f){var o=document.createElement('option');o.value=f;o.textContent=f;s.appendChild(o);});});}
+function undoImport(){if(!confirm('Отменить последний импорт?'))return;fetch('/admin/restore',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS,'x-tenant-id':TID},body:JSON.stringify({file:'pre-import.db'})}).then(function(){msg('Восстановление… контейнер перезапускается',true);setTimeout(function(){location.reload();},5000);});}
+function doRestore(){var f=document.getElementById('bk_list').value;if(!f){msg('Выберите бэкап',false);return;}if(!confirm('Восстановить '+f+'?'))return;fetch('/admin/restore',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS,'x-tenant-id':TID},body:JSON.stringify({file:f})}).then(function(){msg('Восстановление… контейнер перезапускается',true);setTimeout(function(){location.reload();},5000);});}
+function resetSettings(){if(!confirm('Сбросить настройки витрины к дефолту?'))return;fetch('/admin/reset-settings',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS,'x-tenant-id':TID}}).then(function(r){return r.json();}).then(function(){msg('Настройки сброшены',true);});}
 if(PASS)loadBackups();
 setInterval(function(){if(PASS&&document.getElementById('bk_list')&&document.getElementById('bk_list').options.length===0)loadBackups();},3000);
-function loadBrand(){fetch('/api/config').then(function(r){return r.json();}).then(function(c){window._cfg=c;document.getElementById('b_shop').value=c.shop_name||'';document.getElementById('b_slogan').value=c.slogan||'';document.getElementById('b_phone').value=c.phone||'';document.getElementById('b_hero').value=c.hero_url||'';document.getElementById('b_c1').value=c.color_primary||'#667eea';document.getElementById('b_c2').value=c.color_accent||'#764ba2';});}
-function saveBrand(){var c=window._cfg||{};var b={shop_name:document.getElementById('b_shop').value,slogan:document.getElementById('b_slogan').value,phone:document.getElementById('b_phone').value.split('\n').map(function(x){return x.trim();}).filter(Boolean).join('\n'),contact_info:c.contact_info,about:c.about,payment_text:c.payment_text,delivery_text:c.delivery_text,hero_url:document.getElementById('b_hero').value,color_primary:document.getElementById('b_c1').value,color_accent:document.getElementById('b_c2').value,car_brands:c.car_brands||[],categories:c.categories||[]};fetch('/admin/config',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){alert('Внешний вид сохранён');}else{alert(d.error||'Ошибка');}});}
+function loadBrand(){fetch('/admin/config',{headers:hdr()}).then(function(r){return r.json();}).then(function(c){window._cfg=c;document.getElementById('b_shop').value=c.shop_name||'';document.getElementById('b_slogan').value=c.slogan||'';document.getElementById('b_phone').value=c.phone||'';document.getElementById('b_hero').value=c.hero_url||'';document.getElementById('b_c1').value=c.color_primary||'#667eea';document.getElementById('b_c2').value=c.color_accent||'#764ba2';});}
+function saveBrand(){var c=window._cfg||{};var b={shop_name:document.getElementById('b_shop').value,slogan:document.getElementById('b_slogan').value,phone:document.getElementById('b_phone').value.split('\n').map(function(x){return x.trim();}).filter(Boolean).join('\n'),contact_info:c.contact_info,about:c.about,payment_text:c.payment_text,delivery_text:c.delivery_text,hero_url:document.getElementById('b_hero').value,color_primary:document.getElementById('b_c1').value,color_accent:document.getElementById('b_c2').value,car_brands:c.car_brands||[],categories:c.categories||[]};fetch('/admin/config',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':PASS,'x-tenant-id':TID},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){alert('Внешний вид сохранён');}else{alert(d.error||'Ошибка');}});}
 if(PASS)loadBrand();
 var DEMO=location.search.indexOf('demo=1')>=0;
 if(DEMO){
@@ -243,18 +247,18 @@ return _origFetch.call(window,u,o);};
 document.body.insertAdjacentHTML('afterbegin','<div style="background:#f59e0b;color:#1a202c;text-align:center;padding:8px;font-weight:700;position:sticky;top:0;z-index:9999">\u26a1 \u0421\u0438\u043c\u0443\u043b\u044f\u0442\u043e\u0440 \u043c\u0430\u0433\u0430\u0437\u0438\u043d\u0430: \u0432\u0441\u0451 \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442, \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0436\u0438\u0432\u0443\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0432 \u0432\u0430\u0448\u0435\u043c \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0435 \u0434\u043e \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u044f \u0432\u043a\u043b\u0430\u0434\u043a\u0438</div>');
 setTimeout(function(){show();},300);
 }
-function prepPhoto(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var k=Math.min(1,900/Math.max(img.width,img.height));var c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(bl){var fd=new FormData();fd.append('photo',bl,'photo.jpg');fetch('/admin/upload',{method:'POST',headers:{'x-admin-pass':PASS},body:fd}).then(function(r){return r.json();}).then(function(d){if(d.url){document.getElementById('f_photo_url').value=d.url;var pv=document.getElementById('f_prev');pv.src=d.url;pv.hidden=false;ztoast('📷 Фото загружено и сжато');}else{alert(d.error||'Ошибка фото');}});},'image/jpeg',0.78);};img.src=e.target.result;};r.readAsDataURL(f);}
-function refreshProds(cb){fetch('/admin/products',{headers:{'x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(d){window._prods=d.items||d;if(cb)cb();});}
+function prepPhoto(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var k=Math.min(1,900/Math.max(img.width,img.height));var c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(bl){var fd=new FormData();fd.append('photo',bl,'photo.jpg');fetch('/admin/upload',{method:'POST',headers:{'x-admin-pass':PASS,'x-tenant-id':TID},body:fd}).then(function(r){return r.json();}).then(function(d){if(d.url){document.getElementById('f_photo_url').value=d.url;var pv=document.getElementById('f_prev');pv.src=d.url;pv.hidden=false;ztoast('📷 Фото загружено и сжато');}else{alert(d.error||'Ошибка фото');}});},'image/jpeg',0.78);};img.src=e.target.result;};r.readAsDataURL(f);}
+function refreshProds(cb){fetch('/admin/products',{headers:{'x-admin-pass':PASS,'x-tenant-id':TID}}).then(function(r){return r.json();}).then(function(d){window._prods=d.items||d;if(cb)cb();});}
 var _ep=window.editProd;window.editProd=function(id){_ep(id);refreshProds(function(){var p=null;(window._prods||[]).forEach(function(x){if(x.id===id)p=x;});var pv=document.getElementById('f_prev');if(p&&p.photo_url){document.getElementById('f_photo_url').value=p.photo_url;pv.src=p.photo_url;pv.hidden=false;}else{document.getElementById('f_photo_url').value='';pv.hidden=true;}});};
 (function(){var L=[['b_shop','Название магазина — шапка витрины и каталога'],['b_slogan','Слоган — под названием на витрине'],['b_phone','Телефоны — вкладка «Инфо» каталога, по одному в строке'],['b_hero','Hero-картинка — главный экран витрины'],['b_c1','Основной цвет — шапка, кнопки'],['b_c2','Акцентный цвет — акценты, цены']];L.forEach(function(x){var el=document.getElementById(x[0]);if(el)el.insertAdjacentHTML('beforebegin','<div style="font-size:12px;color:#556;margin:10px 0 2px;font-weight:600">'+x[1]+'</div>');});})();
 
-var _ft=window.fetch;window.fetch=function(u,o){var r=_ft(u,o);r.then(function(x){if(x.ok&&o&&o.method&&o.method!=='GET'){var uu=String(u);if(uu.indexOf('/admin/products')>=0)ztoast('✅ Товар сохранён');else if(uu.indexOf('/admin/config')>=0)ztoast('✅ Сохранено');else if(uu.indexOf('/admin/upload')>=0)ztoast('📷 Фото на сервере');}}).catch(function(){});return r;};/*fetch_toast*/
+var _ft=window.fetch;window.fetch=function(u,o){var r=_ft(u,o);r.then(function(x){if(!x.ok&&o&&o.method&&o.method!=='GET'&&String(u).indexOf('/admin/products')>=0){window._saveErr=true;}if(x.ok&&o&&o.method&&o.method!=='GET'){var uu=String(u);if(uu.indexOf('/admin/products')>=0)ztoast('✅ Товар сохранён');else if(uu.indexOf('/admin/config')>=0)ztoast('✅ Сохранено');else if(uu.indexOf('/admin/upload')>=0)ztoast('📷 Фото на сервере');}}).catch(function(){});return r;};/*fetch_toast*/
 
-function prepHero(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var k=Math.min(1,1200/Math.max(img.width,img.height));var cv=document.createElement('canvas');cv.width=Math.round(img.width*k);cv.height=Math.round(img.height*k);cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);cv.toBlob(function(bl){var fd=new FormData();fd.append('photo',bl,'hero.jpg');fetch('/admin/upload',{method:'POST',headers:{'x-admin-pass':PASS},body:fd}).then(function(r){return r.json();}).then(function(d){if(d.url){document.getElementById('b_hero').value=d.url;var pv=document.getElementById('b_hero_prev');pv.src=d.url;pv.hidden=false;msg('🖼 Hero загружен и сжат',true);}else{msg(d.error||'Ошибка',false);}});},'image/jpeg',0.8);};img.src=e.target.result;};r.readAsDataURL(f);}
+function prepHero(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var k=Math.min(1,1200/Math.max(img.width,img.height));var cv=document.createElement('canvas');cv.width=Math.round(img.width*k);cv.height=Math.round(img.height*k);cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);cv.toBlob(function(bl){var fd=new FormData();fd.append('photo',bl,'hero.jpg');fetch('/admin/upload',{method:'POST',headers:{'x-admin-pass':PASS,'x-tenant-id':TID},body:fd}).then(function(r){return r.json();}).then(function(d){if(d.url){document.getElementById('b_hero').value=d.url;var pv=document.getElementById('b_hero_prev');pv.src=d.url;pv.hidden=false;msg('🖼 Hero загружен и сжат',true);}else{msg(d.error||'Ошибка',false);}});},'image/jpeg',0.8);};img.src=e.target.result;};r.readAsDataURL(f);}
 (function(){var hb=document.getElementById('b_hero');if(hb&&!document.getElementById('b_hero_file'))hb.insertAdjacentHTML('afterend','<div style="margin:6px 0"><input type="file" id="b_hero_file" accept="image/*" style="width:auto"><img id="b_hero_prev" style="max-height:60px;border-radius:8px;margin-left:8px" hidden></div>'),document.getElementById('b_hero_file').onchange=function(){prepHero(this);};var _lb=window.loadBrand;window.loadBrand=function(){_lb();setTimeout(function(){var u=document.getElementById('b_hero').value;var pv=document.getElementById('b_hero_prev');if(u&&pv){pv.src=u;pv.hidden=false;}},300);};})();
 
 (function(){/*ux_labels*/
-var L=[['f_article','Артикул * — по нему ищут в каталоге'],['f_name','Название * — видно в карточке'],['f_price','Цена, ₽ *'],['f_stock','Наличие, шт (0 = под заказ)'],['f_category','Категория — фильтр каталога'],['f_brand','Бренд'],['f_car','Марка авто — для подбора'],['s_brand','Название магазина — шапка витрины и каталога'],['s_phone','Телефон — вкладка «Инфо» каталога'],['s_contact','Контакты (TG) — кнопка связи'],['s_about','О компании — вкладка «Инфо»'],['s_pass','Новый пароль (мин. 8 символов)'],['s_pass2','Повторите новый пароль']];
+var L=[['f_article','Артикул — необязательно (код сгенерируется при пустом)'],['f_name','Название * — видно в карточке'],['f_price','Цена, ₽ *'],['f_stock','Наличие, шт (0 = под заказ)'],['f_category','Категория — фильтр каталога'],['f_brand','Бренд'],['f_car','Марка авто — для подбора'],['s_brand','Название магазина — шапка витрины и каталога'],['s_phone','Телефон — вкладка «Инфо» каталога'],['s_contact','Контакты (TG) — кнопка связи'],['s_about','О компании — вкладка «Инфо»'],['s_pass','Новый пароль (мин. 8 символов)'],['s_pass2','Повторите новый пароль']];
 L.forEach(function(x){var el=document.getElementById(x[0]);if(el)el.insertAdjacentHTML('beforebegin','<div style="font-size:12px;color:#556;margin:8px 0 2px;font-weight:600">'+x[1]+'</div>');});
 var fc=document.getElementById('f_car');if(fc&&!document.getElementById('f_desc'))fc.insertAdjacentHTML('afterend','<div style="font-size:12px;color:#556;margin:8px 0 2px;font-weight:600">Описание товара — видно в карточке каталога</div><textarea id="f_desc" rows="2" style="width:100%;padding:10px;border:1px solid #d8dce6;border-radius:10px"></textarea>');
 document.querySelectorAll('button').forEach(function(b){var oc=b.getAttribute('onclick')||'';if(oc.indexOf('copyLink')>=0)b.title='Скопировать ссылку на товар';if(oc.indexOf('shareTg')>=0)b.title='Переслать карточку в Telegram';});
@@ -262,13 +266,54 @@ var _ep2=window.editProd;window.editProd=function(id){_ep2(id);var h=document.qu
 var _sp2=window.saveProd;window.saveProd=function(){_sp2();setTimeout(function(){var h=document.querySelector('h2');if(h&&h.textContent.indexOf('Редактирование')>=0)h.textContent='Новый товар';},800);};
 })();
 
-/*edit_hard*/window.editProd=function(id){function fill(){var p=null;(window._prods||[]).forEach(function(x){if(x.id===id)p=x;});if(!p)return;window.editId=id;document.getElementById('f_article').value=p.article||'';document.getElementById('f_name').value=p.name||'';document.getElementById('f_price').value=p.price==null?'':p.price;document.getElementById('f_stock').value=p.stock==null?'':p.stock;document.getElementById('f_category').value=p.category||'';document.getElementById('f_brand').value=p.brand||'';document.getElementById('f_car').value=p.car_brand||'';var d=document.getElementById('f_desc');if(d)d.value=p.description||'';var pv=document.getElementById('f_prev');if(pv){if(p.photo_url){document.getElementById('f_photo_url').value=p.photo_url;pv.src=p.photo_url;pv.hidden=false;}else{document.getElementById('f_photo_url').value='';pv.hidden=true;}}var h=document.querySelector('h2');if(h)h.textContent='Редактирование: '+(p.article||id);msg('Редактирование '+(p.article||'')+' — измените и нажмите Сохранить',true);if(window._expandNew)window._expandNew();window.scrollTo(0,0);}if(window._prods){fill();}else{fetch('/admin/products',{headers:{'x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(dd){window._prods=dd.items||dd;fill();});}};
+/*edit_hard*/window.editProd=function(id){function fill(){var p=null;(window._prods||[]).forEach(function(x){if(x.id===id)p=x;});if(!p)return;window.editId=id;document.getElementById('f_article').value=p.article||'';document.getElementById('f_name').value=p.name||'';document.getElementById('f_price').value=p.price==null?'':p.price;document.getElementById('f_stock').value=p.stock==null?'':p.stock;document.getElementById('f_category').value=p.category||'';document.getElementById('f_brand').value=p.brand||'';document.getElementById('f_car').value=p.car_brand||'';var d=document.getElementById('f_desc');if(d)d.value=p.description||'';var pv=document.getElementById('f_prev');if(pv){if(p.photo_url){document.getElementById('f_photo_url').value=p.photo_url;pv.src=p.photo_url;pv.hidden=false;}else{document.getElementById('f_photo_url').value='';pv.hidden=true;}}var h=document.querySelector('h2');if(h)h.textContent='Редактирование: '+(p.article||id);msg('Редактирование '+(p.article||'')+' — измените и нажмите Сохранить',true);if(window._expandNew)window._expandNew();window.scrollTo(0,0);}if(window._prods){fill();}else{fetch('/admin/products',{headers:{'x-admin-pass':PASS,'x-tenant-id':TID}}).then(function(r){return r.json();}).then(function(dd){window._prods=dd.items||dd;fill();});}};
 
 function ztoast(m){var t=document.getElementById('ztoast');if(!t){t=document.createElement('div');t.id='ztoast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 22px;border-radius:24px;font-size:14px;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,.4)';document.body.appendChild(t);}t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},3000);}
-var _sp3=window.saveProd;window.saveProd=function(){_sp3();setTimeout(function(){['f_article','f_name','f_price','f_stock','f_category','f_brand','f_car'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});var d=document.getElementById('f_desc');if(d)d.value='';var pu=document.getElementById('f_photo_url');if(pu)pu.value='';var pv=document.getElementById('f_prev');if(pv)pv.hidden=true;var ff=document.getElementById('f_file');if(ff)ff.value='';window.editId=null;var h=document.querySelector('h2');if(h)h.textContent='Новый товар';ztoast('✅ Товар сохранён');},700);};
+var _sp3=window.saveProd;window.saveProd=function(){_sp3();setTimeout(function(){if(window._saveErr){window._saveErr=false;return;}['f_article','f_name','f_price','f_stock','f_category','f_brand','f_car','f_country'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});var d=document.getElementById('f_desc');if(d)d.value='';var pu=document.getElementById('f_photo_url');if(pu)pu.value='';var pv=document.getElementById('f_prev');if(pv)pv.hidden=true;var ff=document.getElementById('f_file');if(ff)ff.value='';window.editId=null;var h=document.querySelector('h2');if(h)h.textContent='Новый товар';ztoast('✅ Товар сохранён');},700);};
 (function(){var d=document.getElementById('f_desc');if(d){d.rows=4;d.style.minHeight='110px';d.style.fontSize='14px';}})();
 
-/*collapse_new*/(function(){var h=null;document.querySelectorAll('h2,h3').forEach(function(x){if(x.textContent.indexOf('Новый товар')>=0)h=x;});if(!h)return;var tog=document.createElement('button');tog.style.cssText='margin-left:10px;font-size:12px;padding:6px 12px';h.appendChild(tog);var nodes=[];var el=h.nextElementSibling;while(el&&el.tagName!=='H2'&&el.tagName!=='H3'){nodes.push(el);el=el.nextElementSibling;}var col=true;function apply(){nodes.forEach(function(n){n.style.display=col?'none':'';});tog.textContent=col?'▸ Показать форму':'▾ Скрыть форму';}tog.onclick=function(){col=!col;apply();};apply();window._expandNew=function(){col=false;apply();};})();
+function aiToast(m){var t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 16px;border-radius:10px;z-index:999;max-width:90%;text-align:center;display:block';t.textContent=m;clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},4000);}
+function aiToast(m){var t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 16px;border-radius:10px;z-index:999;max-width:90%;text-align:center;display:block';t.textContent=m;clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},4000);}
+function aiParse(t){
+var r={};
+var W={'один':1,'одна':1,'два':2,'две':2,'три':3,'четыре':4,'пять':5,'шесть':6,'семь':7,'восемь':8,'девять':9,'десять':10};
+function num(s){s=String(s).trim().toLowerCase();if(W[s])return W[s];var d=s.replace(/[^\d.,]/g,'');if(!d)return NaN;if(/[.,]\d{3}$/.test(d))d=d.replace(/[.,]/g,'');else d=d.replace(',','.');return parseFloat(d);}
+var pm=t.match(/цена[::]?\s*([\d.,\s]{2,15})/i)||t.match(/([\d.,\s]{2,15})\s*(?:₽|руб)/i);
+if(pm){var pv=num(pm[1]);if(!isNaN(pv)&&pv>0)r.price=pv;}
+var sm=t.match(/(?:в\s+наличии|наличии|наличие)[::]?\s*(\d+|один|одна|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять)/i)||t.match(/(\d+|один|одна|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять)\s*(?:штуки|штук|шт)/i);
+if(sm)r.stock=num(sm[1]);else if(/в\s+наличии/i.test(t))r.stock=1;else if(/под\s+заказ/i.test(t))r.stock=0;
+r.used=/б\/у|контракт/i.test(t);
+var cm=t.match(/(?:производств\w*|страна|made\s+in)[::]?\s+([A-Za-zА-Яа-я]{2,15})/i);
+if(cm)r.country=cm[1];
+var KM=[['тормоз|колодк|суппорт','Тормозная система'],['аморт|рычаг|шаров|стабил|подвес','Подвеска'],['фильтр','Фильтры'],['масл','Моторные масла'],['радиатор|термостат|помпа','Охлаждение'],['мкпп|акпп|сцепл|шрус|трансм','Трансмиссия'],['аккум','Аккумуляторы'],['диск литой|шин|колес','Колёса и диски'],['фар|зеркал|двер|капот|бампер|кузов','Кузов'],['двигат','Двигатели'],['насос|генератор|стартер|датчик|замок|стеклопод','Электрика']];
+for(var i=0;i<KM.length;i++){if(new RegExp(KM[i][0],'i').test(t)){r.category=KM[i][1];break;}}
+var D=(window.DICT||{});
+var POP=['Toyota','Nissan','Hyundai','Kia','Renault','Volkswagen','Skoda','Lada','Chevrolet','Ford','Mazda','Mitsubishi','Honda','BMW','Mercedes','Audi'];
+var brands=(D.f_brand&&D.f_brand.length?D.f_brand:[]).concat(['Bosch','NGK','SKF','LUK','Sachs','Mann','Mahle','Brembo','TRW','Lemforder','Kayaba','Luzar']).concat(POP);
+for(i=0;i<brands.length;i++){if(t.toLowerCase().indexOf(brands[i].toLowerCase())>=0){r.brand=brands[i];break;}}
+var cars=(D.f_car&&D.f_car.length)?D.f_car:POP;
+for(i=0;i<cars.length;i++){if(t.toLowerCase().indexOf(cars[i].toLowerCase())>=0){r.car=cars[i];break;}}
+var nm=t;if(pm)nm=nm.replace(pm[0],'');if(sm)nm=nm.replace(sm[0],'');if(cm)nm=nm.replace(cm[0],'');nm=nm.replace(/(в\s+наличии|под\s+заказ|новая|новый|новое|б\/у|контрактная|контрактный)/gi,'');nm=nm.replace(/\s+/g,' ').trim();r.name=nm.slice(0,60);
+r.conf=(r.price?1:0)+(r.category?1:0)+(r.name.length>=4?1:0)+((r.brand||r.car)?1:0);
+return r;}
+function aiFill(){
+var el=document.getElementById('ai_text');var t=(el&&el.value)||'';
+if(t.trim().length<4){aiToast('⚠️ Вставьте текст карточки');return;}
+var r=aiParse(t);
+function setSel(id,val){if(!val)return;var sel=document.getElementById(id);if(!sel)return;var has=Array.prototype.some.call(sel.options,function(o){return o.value===val;});if(!has){var o=document.createElement('option');o.value=val;o.textContent=val;var nn=sel.querySelector('option[value="__new"]');if(nn)sel.insertBefore(o,nn);else sel.appendChild(o);}sel.value=val;}
+if(r.price)document.getElementById('f_price').value=r.price;
+if(r.stock!==undefined)document.getElementById('f_stock').value=r.stock;
+if(r.country){var fc=document.getElementById('f_country');if(fc)fc.value=r.country;}
+setSel('f_category',r.category);setSel('f_brand',r.brand);setSel('f_car',r.car);
+if(r.name)document.getElementById('f_name').value=r.name;
+var st=r.stock!==undefined?r.stock:(document.getElementById('f_stock').value||0);
+var d=r.name+(r.brand?', бренд '+r.brand:'')+(r.car?', '+r.car:'')+'. '+(r.used?'Состояние: б/у (контракт).':'Состояние: новое.')+(r.country?' Страна: '+r.country+'.':'')+' Наличие: '+st+' шт.'+(r.category?' Категория: '+r.category+'.':'');
+document.getElementById('f_desc').value=d;
+if(window._expandNew)window._expandNew();
+aiToast(r.conf>=3?'🤖 Распознано '+r.conf+' из 4 полей — проверьте и сохраните':'⚠️ Распознано частично ('+r.conf+' из 4) — дополните вручную');}
+(function(){if(document.getElementById('ai_text'))return;var h=document.querySelector('h2');if(!h)return;var box=document.createElement('div');box.style.cssText='margin:10px 0;padding:12px;border:1px dashed #667eea;border-radius:12px';box.innerHTML='<b>🤖 AI-помощник</b> <span style="color:#667eea;font-size:12px">создаёт карточку из одной строки: цена, наличие, категория, бренд, страна — проверьте и сохраните</span> <textarea id="ai_text" rows=3 placeholder="Например: шаровая опора, производство Китай, цена 2500, в наличии" style="width:100%;margin:8px 0"></textarea> <button class="gray" onclick="aiFill()">Разобрать текст в поля</button>';h.parentNode.insertBefore(box,h.nextSibling);})();
+/*collapse_new*/(function(){var h=null;document.querySelectorAll('h2,h3').forEach(function(x){if(x.textContent.indexOf('Новый товар')>=0)h=x;});if(!h)return;var tog=document.createElement('button');tog.style.cssText='margin-left:10px;font-size:12px;padding:6px 12px';h.appendChild(tog);var nodes=[];var el=h.nextElementSibling;while(el&&el.tagName!=='H2'&&el.tagName!=='H3'){nodes.push(el);el=el.nextElementSibling;}var col=true;function apply(){nodes.forEach(function(n){n.style.display=col?'none':'';});tog.textContent=col?'▸ Создать новый товар':'▾ Скрыть форму';}tog.onclick=function(){col=!col;apply();};apply();window._expandNew=function(){col=false;apply();};})();
+function aiToast(m){var t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 16px;border-radius:10px;z-index:999;max-width:90%;text-align:center;display:block';t.textContent=m;clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},4000);}
 </script>
 </body>
 </html>
