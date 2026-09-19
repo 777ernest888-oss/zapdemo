@@ -10,12 +10,13 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;font-family:system-ui;background:#f5f6fa}
-header.top{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.2)}
-.shop{padding:10px 12px 4px;font-weight:800;font-size:17px}
+header.top{position:sticky;top:0;z-index:20;transition:transform .25s ease;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.shop{padding:6px 12px 2px;font-weight:800;font-size:17px}
+body.hdr-hide header.top{transform:translateY(-100%)}
 .tabs{display:flex}
-.tabs button{flex:1;padding:10px 2px 8px;border:none;background:none;color:rgba(255,255,255,.75);font-size:12px;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button{flex:1;padding:6px 2px 5px;border:none;background:none;color:rgba(255,255,255,.75);font-size:12px;cursor:pointer;border-bottom:3px solid transparent}
 .tabs button.on{color:#fff;font-weight:800;border-bottom-color:#ffd700}
-.searchbox{position:sticky;top:0;z-index:19;padding:8px 10px;background:linear-gradient(135deg,var(--primary),var(--accent))}
+.searchbox{position:sticky;top:0;z-index:19;padding:5px 10px;background:linear-gradient(135deg,var(--primary),var(--accent))}
 #q{width:100%;padding:11px 14px;border:none;border-radius:12px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 #upd{font-size:11px;color:#fff;opacity:.85;margin-top:5px}
 .brands{display:flex;gap:8px;overflow-x:auto;padding:10px 10px 4px;-webkit-overflow-scrolling:touch}
@@ -29,7 +30,7 @@ header.top{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,va
 .card:hover{box-shadow:0 6px 18px rgba(0,0,0,.15)}
 .photo{height:110px;display:flex;align-items:center;justify-content:center;font-size:44px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 18%,#fff),color-mix(in srgb,var(--accent) 18%,#fff))}
 .cbody{padding:10px 12px;display:flex;flex-direction:column;flex:1}
-.name{font-size:15px;font-weight:700}
+.name{font-size:15px;font-weight:700;line-height:1.3;max-height:2.6em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .art{font-size:12px;color:#8a8f9c;margin-top:2px}
 .brow{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .badge{font-size:11px;padding:3px 9px;border-radius:20px;color:#fff;font-weight:600}
@@ -55,8 +56,18 @@ form button{padding:13px;border:none;border-radius:12px;background:var(--primary
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30;display:flex;align-items:flex-end}
 .mbox{background:#fff;width:100%;max-height:85vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px}
 .mrow{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
-.an{padding:9px;border-top:1px solid #eee;font-size:13px;display:flex;justify-content:space-between;cursor:pointer}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:9px 18px;border-radius:22px;font-size:13px;display:none;z-index:40}
+.analogs-scroll{display:flex;gap:10px;overflow-x:auto;padding:8px 0;-webkit-overflow-scrolling:touch}
+.analog-card{flex:0 0 140px;background:#f8f9fa;border:1px solid #e3e4ea;border-radius:10px;padding:10px;cursor:pointer}
+.analog-card .brand{font-size:12px;color:#666;margin-bottom:4px}
+.analog-card .price{font-size:14px;font-weight:700;color:var(--primary)}
+.analog-card .choose{display:block;margin-top:6px;padding:5px 10px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;text-align:center}
+.pull-bar{width:40px;height:4px;background:#d8dce6;border-radius:2px;margin:8px auto 12px;cursor:grab}
+.desc-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 0;cursor:pointer;font-weight:600;font-size:14px;color:#333}
+.desc-toggle svg{transition:transform .2s}
+.desc-toggle.open svg{transform:rotate(180deg)}
+.desc-content{max-height:0;overflow:hidden;transition:max-height .3s;font-size:13px;color:#555;line-height:1.5}
+.desc-content.open{max-height:200px}
+#toast{position:fixed;top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%);background:#333;color:#fff;padding:14px 18px;border-radius:14px;font-size:15px;font-weight:600;display:none;z-index:9999;max-width:86vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.4)}
 @media(min-width:768px){
 .shop{font-size:22px}
 .tabs button{font-size:15px;padding:14px 4px 10px}
@@ -69,7 +80,7 @@ form button{padding:13px;border:none;border-radius:12px;background:var(--primary
 }
 img.photo{object-fit:cover}
 img.photo{object-fit:cover;display:block}
-</style>
+.mphoto{height:34vh;background:#2f3542;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin:10px 0 8px}.mphoto img{width:100%;height:100%;object-fit:cover}.mphoto .ph{color:#9aa3b2;font-size:13px;text-align:center;padding:0 12px}.mchips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}.mchips span{background:#eef1f7;color:#39415a;border-radius:999px;padding:4px 10px;font-size:12px}.flash{animation:fl .45s ease}@keyframes fl{0%{background:#fff3cd}100%{background:transparent}}.mbox{position:relative}.fin{padding:10px;border:1px solid #d8dce6;border-radius:10px;margin:4px 0;font:inherit}.ub{background:#f97316;color:#fff;border-radius:8px;padding:2px 8px;font-size:11px;margin-left:6px}.cb{background:#e0e7ff;color:#3730a3;border-radius:8px;padding:2px 8px;font-size:11px;margin-left:6px}#m_desc{font-size:15px;line-height:1.55;color:#333}</style>
 </head>
 <body>
 <header class="top">
@@ -108,9 +119,9 @@ img.photo{object-fit:cover;display:block}
 </section>
 <section id="t-vin" hidden>
 <form onsubmit="sendVin(event)">
-<input id="v_vin" placeholder="VIN (необязательно)">
-<textarea id="v_desc" rows="3" maxlength="100" placeholder="Что нужно? (до 100 знаков)" required></textarea>
-<input id="v_contact" placeholder="Контакт (телефон или @telegram)" required>
+<input class="fin" id="v_vin" placeholder="VIN (необязательно)">
+<textarea class="fin" id="v_desc" rows="3" maxlength="100" placeholder="Что нужно? (до 100 знаков)" required></textarea>
+<input class="fin" id="v_contact" placeholder="Телефон: +7 (XXX) XXX-XX-XX" type="tel" inputmode="numeric" required><input class="fin" id="v_tg" maxlength="33" placeholder="Telegram: @username (латиница, необязательно)">
 <button>Отправить запрос</button>
 </form>
 <div id="vin_msg" class="info"></div>
@@ -125,15 +136,18 @@ img.photo{object-fit:cover;display:block}
 <a id="i_call" class="mbtn">📞 Позвонить</a>
 </div>
 </section>
-<div id="modal" class="modal" hidden onclick="if(event.target===this)this.hidden=true">
-<div class="mbox">
-<h3 id="m_name" style="margin:0 0 6px"></h3>
+<div id="modal" class="modal" hidden onclick="if(event.target===this)closeModal()">
+<div class="mbox" ontouchstart="startSwipe(event)" ontouchmove="moveSwipe(event)" ontouchend="endSwipe(event)">
+<div class="pull-bar"></div><div id="m_close" onclick="closeModal()" style="position:absolute;top:8px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(20,24,34,.55);color:#fff;font-size:20px;line-height:36px;text-align:center;cursor:pointer;z-index:6">✕</div>
+<div id="m_photo" class="mphoto"></div><div id="m_chips" class="mchips"></div><h3 id="m_name" style="margin:0 0 6px"></h3>
 <div id="m_art" class="art"></div>
 <div class="mrow"><span id="m_price" class="price"></span><span id="m_badge"></span></div>
 <div id="m_term" style="font-size:13px;color:#666"></div>
-<div><button id="m_ask" class="mbtn" style="border:none;cursor:pointer" onclick="document.getElementById('ask_box').hidden=false">📨 Отправить запрос</button><button class="mbtn" onclick="copyLink()">🔗 Ссылка</button><button class="mbtn" style="background:#888" onclick="document.getElementById('modal').hidden=true">Закрыть</button></div>
-<h4 style="margin:12px 0 4px">Аналоги (не дороже)</h4>
-<div id="m_an"></div><div id="m_desc" style="font-size:13px;color:#555;margin:8px 0"></div><div id="ask_box" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:6px"><input id="a_contact" placeholder="Ваш телефон или @telegram" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_note" maxlength="30" placeholder="Комментарий (до 30 знаков)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><button class="mbtn" style="border:none;cursor:pointer" onclick="sendAsk()">Отправить запрос</button></div>
+<div class="desc-toggle" onclick="toggleDesc()" style="display:none"><span>📄 Описание и характеристики</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+<div id="m_desc" class="desc-content"></div>
+<div><button id="m_ask" class="mbtn" style="border:none;cursor:pointer" onclick="openAsk()">📨 Отправить запрос</button><button class="mbtn" onclick="shareLink()">📤 Поделиться</button></div><div id="ask_box" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:6px"><input id="a_contact" placeholder="+7 (XXX) XXX-XX-XX" type="tel" inputmode="numeric" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_tg" maxlength="33" placeholder="Telegram: @username (латиница, необязательно)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_note" maxlength="30" placeholder="Комментарий (до 30 знаков)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><button id="ask_btn" class="mbtn" style="border:none;cursor:pointer;opacity:.7" onclick="sendAsk()">Отправить запрос</button></div>
+<h4 id="m_an_title" style="margin:12px 0 4px;display:none">Аналоги</h4>
+<div id="m_an" class="analogs-scroll"></div>
 </div>
 </div>
 <div id="toast"></div>
@@ -145,15 +159,32 @@ function emo(c){var m={'Масла':'🛢️','Фильтры':'🌀','Торм�
 function fits(p){for(var i=0;i<GAR.length;i++)if(GAR[i].brand===p.car_brand&&GAR[i].model===p.model)return true;return false;}
 function badge(p){var h=p.stock>0?'<span class="badge b-in">В наличии</span>':'<span class="badge b-out">Под заказ (3–5 дн.)</span>';if(fits(p))h+='<span class="badge b-fit">✓ Подойдёт</span>';return h;}
 function photoHtml(p){return p.photo_url?'<img class="photo" src="'+p.photo_url+'" alt="">':'<div class="photo">'+emo(p.category)+'</div>';}
-function card(p){return '<div class="card" onclick="openP('+p.id+')">'+photoHtml(p)+'<div class="cbody"><div class="name">'+p.name+'</div><div class="art">'+p.article+(p.car_brand?' · '+p.car_brand+' '+ (p.model||''):'')+'</div><div class="brow">'+badge(p)+'</div><div class="cfoot"><span class="price">'+p.price+' ₽</span></div></div></div>';}
+function card(p){return '<div class="card" onclick="openP('+p.id+')">'+photoHtml(p)+'<div class="cbody"><div class="name">'+p.name+'</div><div class="art">'+p.article+(p.car_brand?' · '+p.car_brand+' '+ (p.model||''):'')+'</div><div class="brow">'+badge(p)+(p.condition==='used'?'<span class="ub">Б/у</span>':'')+(p.country?'<span class="cb">🌍 '+p.country+'</span>':'')+'</div><div class="cfoot"><span class="price">'+p.price+' ₽</span></div></div></div>';}
 function tab(t,btn){var s=document.querySelectorAll('section');for(var i=0;i<s.length;i++)s[i].hidden=true;$('t-'+t).hidden=false;var b=document.querySelectorAll('.tabs button');for(var i=0;i<b.length;i++)b[i].className='';btn.className='on';}
-function render(){var q=$('q').value.trim().toLowerCase();var l=PRODS.filter(function(p){if(q&&(p.article||'').toLowerCase().indexOf(q)<0&&(p.name||'').toLowerCase().indexOf(q)<0)return false;if($('f_stock').checked&&p.stock<=0)return false;if($('f_brand').value&&p.brand!==$('f_brand').value)return false;if($('f_cat').value&&p.category!==$('f_cat').value)return false;if(fCar&&p.car_brand!==fCar)return false;return true;});var s=$('f_sort').value;if(s==='price_asc')l.sort(function(a,b){return a.price-b.price;});if(s==='price_desc')l.sort(function(a,b){return b.price-a.price;});if(s==='stock')l.sort(function(a,b){return b.stock-a.stock;});var h='';for(var i=0;i<Math.min(shown,l.length);i++)h+=card(l[i]);$('list').innerHTML=h||'<div class="info">Ничего не найдено</div>';$('more').style.display=l.length>shown?'block':'none';}
+function render(){var q=$('q').value.trim().toLowerCase();var l=PRODS.filter(function(p){if(q){var hay=((p.article||'')+' '+(p.name||'')+' '+(p.category||'')).toLowerCase();var tk=q.split(/\s+/);for(var ti=0;ti<tk.length;ti++){if(tk[ti]&&hay.indexOf(tk[ti])<0)return false;}}if($('f_stock').checked&&p.stock<=0)return false;if($('f_brand').value&&p.brand!==$('f_brand').value)return false;if($('f_cat').value&&p.category!==$('f_cat').value)return false;if(fCar&&p.car_brand!==fCar)return false;return true;});var s=$('f_sort').value;if(s==='price_asc')l.sort(function(a,b){return a.price-b.price;});if(s==='price_desc')l.sort(function(a,b){return b.price-a.price;});if(s==='stock')l.sort(function(a,b){return b.stock-a.stock;});var h='';for(var i=0;i<Math.min(shown,l.length);i++)h+=card(l[i]);$('list').innerHTML=h||'<div class="info">Ничего не найдено. В новом магазине товары появятся после загрузки прайса</div>';$('more').style.display=l.length>shown?'block':'none';}
 var fCar='';
 function pickBrand(el,b){fCar=(fCar===b)?'':b;var d=document.querySelectorAll('.brands div');for(var i=0;i<d.length;i++)d[i].className='';if(fCar)el.className='on';render();}
-function openP(id){var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];if(!p)return;cur=p;$('m_name').textContent=p.name;$('m_art').textContent=p.article;$('m_price').textContent=p.price+' ₽';$('m_badge').innerHTML=badge(p);$('m_term').textContent=p.stock>0?'Отгрузка сегодня':'Срок поставки 3–5 дней';/*m_write removed*/fetch('/api/analogs/'+id).then(function(r){return r.json();}).then(function(a){var h='';for(var i=0;i<a.length;i++)h+='<div class="an" onclick="openP('+a[i].id+')"><span>'+a[i].name+'</span><b>'+a[i].price+' ₽</b></div>';$('m_an').innerHTML=h||'<div style="font-size:13px;color:#888">Нет аналогов</div>';$('m_desc').textContent=p.description||'';});$('modal').hidden=false;}
+var TENANT=new URLSearchParams(location.search).get("tenant")||"demo";
+var lastY=0;window.addEventListener('scroll',function(){var y=window.scrollY;if(!document.getElementById('modal').hidden)return;if(y>lastY&&y>120){document.body.classList.add('hdr-hide');}else if(y<lastY){document.body.classList.remove('hdr-hide');}lastY=y;},{passive:true});
+var swipeY=0,swiping=false;
+function startSwipe(e){swipeY=e.touches[0].clientY;swiping=true;var sc=false,n=e.target;while(n&&n!==document.body){if(n.classList&&(n.classList.contains('analogs-scroll')||n.classList.contains('desc-content'))){sc=true;break;}n=n.parentNode;}var r=document.querySelector('.mbox');swipeOk=!sc&&(!r||r.scrollTop<=2);}
+function moveSwipe(e){if(swiping&&swipeOk&&e.touches[0].clientY-swipeY>80){closeModal();swiping=false;}}
+function endSwipe(){swiping=false;}
+function closeModal(){$('modal').hidden=true;$('ask_box').hidden=true;}
+function toggleDesc(){document.querySelector('.desc-toggle').classList.toggle('open');$('m_desc').classList.toggle('open');}
+function shareLink(){if(!cur)return;var u=location.origin+'/catalog.html?v=40&p='+cur.id+'#p'+cur.id;if(navigator.share){navigator.share({title:cur.name,text:cur.article+' — '+cur.price+' ₽',url:u}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(u);toast('Ссылка скопирована');}}
+function maskPhone(el){var d=el.value.replace(/\D/g,'');if(d.charAt(0)==='8')d='7'+d.slice(1);if(d&&d.charAt(0)!=='7')d='7'+d;if(d==='7'){el.value='+7 (';return false;}if(d.length>11)d=d.slice(0,11);var x=d.slice(1);var o='';if(x.length){o='+7 ('+x.slice(0,3);if(x.length>3)o+=') '+x.slice(3,6);if(x.length>6)o+='-'+x.slice(6,8);if(x.length>8)o+='-'+x.slice(8,10);}el.value=o;return x.length===10;}
+function smartContact(el,onOk){el.addEventListener('input',function(){var ok=maskPhone(el);if(onOk)onOk(ok);});}
+function initContacts(){var a=document.getElementById('a_contact');if(a){smartContact(a,function(ok){var b=document.getElementById('ask_btn');if(b)b.style.opacity=ok?'1':'.7';});}var v=document.getElementById('v_contact');if(v){smartContact(v,null);}}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initContacts);}else{initContacts();}
+document.addEventListener('input',function(e){var t=e.target;if(!t)return;var id=t.id;if(id==='a_contact'||id==='v_contact'){var v=t.value||'';if(v.charAt(0)==='@')return;maskPhone(t);return;}if(id==='a_tg'||id==='v_tg'){var M='аa бb вv гg дd еe ёe жzh зz иi йy кk лl мm нn оo пp рr сs тt уu фf хh цc чch шsh щsch ъ- ыy ь- эe юyu яya'.split(' ');var nv=(t.value||'').replace(/[а-яё]/gi,function(c){var l=c.toLowerCase();for(var q=0;q<M.length;q++){if(M[q].charAt(0)===l){var r=M[q].slice(1).replace('-','');return c===c.toUpperCase()?r.toUpperCase():r;}}return '';});if(nv!==t.value)t.value=nv;}});
+document.addEventListener('focusin',function(e){var t=e.target;if(!t)return;if(t.id==='a_tg'||t.id==='v_tg'){if(!t.value)t.value='@';}});
+function openAsk(){var b=document.getElementById('ask_box');if(!b)return;b.hidden=false;b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');if(b.scrollIntoView)b.scrollIntoView({behavior:'smooth',block:'center'});var c=document.getElementById('a_contact');if(c)setTimeout(function(){c.focus();},250);}
+function askBusy(on){var b=document.getElementById('ask_btn');if(b){b.disabled=on;b.textContent=on?'Отправка…':'Отправить запрос';}}
+
+function openP(id){var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];if(!p)return;cur=p;$('m_name').textContent=p.name;$('m_art').textContent=p.article;$('m_price').textContent=p.price+' ₽';$('m_badge').innerHTML=badge(p)+(p.condition==='used'?'<span class="ub">Б/у</span>':'');$('m_term').textContent=p.stock>0?'Отгрузка сегодня':'Срок поставки 3–5 дней';var fill=function(el){if(!el)return;if(p.photo_url){el.innerHTML='<img src="'+p.photo_url+'" alt="">';}else{el.innerHTML='<div class="ph">📦 '+(p.category||'Запчасти')+'<br>арт. '+p.article+'</div>';}};fill(document.getElementById('m_photo'));setTimeout(function(){fill(document.getElementById('m_photo'));},400);var ch='';if(p.brand)ch+='<span>🏭 '+p.brand+'</span>';if(p.category)ch+='<span>🗂 '+p.category+'</span>';if(p.car_brand&&p.car_brand!=='Универсальный')ch+='<span>🚗 '+p.car_brand+'</span>';ch+='<span>'+(p.stock>0?'📦 В наличии: '+p.stock:'⏳ Под заказ')+'</span>';var mc=document.getElementById('m_chips');if(mc){mc.innerHTML=ch;}else{setTimeout(function(){var e2=document.getElementById('m_chips');if(e2)e2.innerHTML=ch;},400);}var bx=document.querySelector('.mbox');if(bx){bx.scrollTop=0;bx.classList.remove('flash');void bx.offsetWidth;bx.classList.add('flash');}fetch('/api/products/analogs/'+id+'?tenant='+TENANT).then(function(r){return r.json();}).then(function(a){var h='';for(var i=0;i<a.length;i++)h+='<div class="analog-card" style="cursor:pointer" onclick="openP('+a[i].id+')"><div class="brand">'+(a[i].brand||'—')+'</div><div class="price">'+a[i].price+' ₽</div><div style="font-size:11px;color:#888">'+a[i].article+'</div><div style="color:#667eea;font-size:12px;font-weight:700;margin-top:4px">Выбрать →</div></div>';$('m_desc').classList.remove('open');document.querySelector('.desc-toggle').classList.remove('open');var ti=$('m_an_title');var tg2=document.querySelector('.desc-toggle');if(!a||!a.length){ti.style.display='none';$('m_an').innerHTML='';}else{ti.style.display='block';$('m_an').innerHTML=h;}if(p.description){tg2.style.display='flex';$('m_desc').textContent=p.description;}else{tg2.style.display='none';$('m_desc').textContent='';}});$('modal').hidden=false;}
 function tgLink(el){var m=(CFG.contact_info||'').match(/@([A-Za-z0-9_]+)/);el.href=m?('https://t.me/'+m[1]):'#';el.target='_blank';return true;}
-function copyLink(){if(cur&&navigator.clipboard){navigator.clipboard.writeText(location.origin+'/catalog.html?v=11#p'+cur.id);toast('Ссылка скопирована');}}
-function sendVin(e){e.preventDefault();var b={vin:$('v_vin').value.trim(),description:$('v_desc').value.trim(),contact:$('v_contact').value.trim()};fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){$('vin_msg').innerHTML='<div>✅ Запрос отправлен. Ответим в ближайшее время.</div>';$('v_vin').value='';$('v_desc').value='';$('v_contact').value='';toast('Запрос отправлен');setTimeout(function(){$('vin_msg').innerHTML='';},4000);}else{$('vin_msg').innerHTML='<div>❌ '+(d.error||'Ошибка отправки')+'</div>';}}).catch(function(){$('vin_msg').innerHTML='<div>❌ Ошибка отправки</div>';});}
+function copyLink(){if(cur&&navigator.clipboard){navigator.clipboard.writeText(location.origin+'/catalog.html?v=40&p='+cur.id+'#p'+cur.id);toast('Ссылка скопирована');}}
+function sendVin(e){if(e&&e.preventDefault)e.preventDefault();try{var ev=document.getElementById('v_vin'),ed=document.getElementById('v_desc'),ec=document.getElementById('v_contact'),et=document.getElementById('v_tg');if(!ev||!ed||!ec){toast('\u26A0\uFE0F Форма не готова — обновите страницу');return;}var tg=et?et.value.trim():'';if(tg==='@')tg='';if(tg&&!/^@[a-zA-Z0-9_]{3,32}$/.test(tg)){toast('\u26A0\uFE0F Telegram: @username — латиница, цифры, _ (3-32 после @)');return;}var dg=ec.value.replace(/\D/g,'');if(dg.length<10){toast('\u26A0\uFE0F Телефон: ровно 11 цифр (+7 XXX XXX-XX-XX)');return;}var b={vin:ev.value.trim(),description:ed.value.trim(),contact:ec.value.trim()};if(tg){b.description=b.description+'\n\u2709\uFE0F TG: '+tg;}toast('\u23F3 Отправляю...');fetch('/api/requests?tenant='+TENANT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){toast(d.push_status==='failed'?'\u26A0\uFE0F Заявка сохранена, но пуш не доставлен':'\u2705 Запрос отправлен');ev.value='';ed.value='';ec.value='';if(et)et.value='';}else{toast('\u26A0\uFE0F '+(d.error||'Ошибка отправки'));}}).catch(function(){toast('\u26A0\uFE0F Ошибка отправки — проверьте связь и повторите');});}catch(er){console.error(er);toast('\u26A0\uFE0F Ошибка отправки — обновите страницу и повторите');}}
 function dvals(f){var m={};for(var i=0;i<PRODS.length;i++){var v=f(PRODS[i]);if(v)m[v]=1;}return Object.keys(m).sort();}
 function fillSel(sel,vals){var h='<option value="">'+sel.options[0].textContent+'</option>';for(var i=0;i<vals.length;i++)h+='<option>'+vals[i]+'</option>';sel.innerHTML=h;}
 function selModel(){var c=$('s_car').value;$('s_model').hidden=!c;$('s_year').hidden=true;$('s_cats').innerHTML='';$('s_list').innerHTML='';if(!c)return;fillSel($('s_model'),dvals(function(p){return p.car_brand===c?p.model:null;}));$('s_model').onchange=selYear;}
@@ -163,16 +194,17 @@ function selList(cat){var c=$('s_car').value,m=$('s_model').value,y=$('s_year').
 function addCar(){var b=$('s_car').value,m=$('s_model').value,y=$('s_year').value;if(!b||!m){toast('Выберите марку и модель');return;}GAR.push({brand:b,model:m,year:y});localStorage.setItem('garage',JSON.stringify(GAR));renderGarage();render();toast('Машина добавлена: '+b+' '+m);}
 function rmCar(i){GAR.splice(i,1);localStorage.setItem('garage',JSON.stringify(GAR));renderGarage();render();}
 function renderGarage(){var h='';for(var i=0;i<GAR.length;i++)h+='<div class="gar"><span>🚗 '+GAR[i].brand+' '+GAR[i].model+(GAR[i].year?' '+GAR[i].year:'')+'</span><button onclick="rmCar('+i+')">✕</button></div>';$('garage').innerHTML=h;}
-fetch('/api/config').then(function(r){return r.json();}).then(function(c){CFG=c;if(c.shop_name)$('shop').textContent=c.shop_name;if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);$('upd').textContent='Наличие обновлено: '+(c.updated_at||'').slice(0,10);var ph=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean);$('i_phone').innerHTML=ph.map(function(x){return '<a href="tel:'+x.replace(/[^0-9+]/g,'')+'" style="display:block;margin:2px 0">📞 '+x+'</a>';}).join('');$('i_contact').textContent=c.contact_info||'';$('i_about').textContent=c.about||'';$('i_pay').textContent='💳 '+(c.payment_text||'');$('i_del').textContent='🚚 '+(c.delivery_text||'');var ph0=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean)[0];if(ph0)$('i_call').href='tel:'+ph0.replace(/[^0-9+]/g,'');});
+fetch('/api/config?tenant='+TENANT).then(function(r){return r.json();}).then(function(c){CFG=c;if(c.shop_name)$('shop').textContent=c.shop_name;if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);$('upd').textContent='Наличие обновлено: '+(c.updated_at||'').slice(0,10);var ph=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean);$('i_phone').innerHTML=ph.map(function(x){return '<a href="tel:'+x.replace(/[^0-9+]/g,'')+'" style="display:block;margin:2px 0">📞 '+x+'</a>';}).join('');$('i_contact').textContent=c.contact_info||'';$('i_about').textContent=c.about||'';$('i_pay').textContent='💳 '+(c.payment_text||'');$('i_del').textContent='🚚 '+(c.delivery_text||'');var ph0=(c.phone||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean)[0];if(ph0)$('i_call').href='tel:'+ph0.replace(/[^0-9+]/g,'');});
 $('list').innerHTML='<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
-fetch('/api/products?limit=1000').then(function(r){return r.json();}).then(function(a){PRODS=a.items||a;var bs=dvals(function(p){return p.car_brand;});var h='';for(var i=0;i<bs.length;i++)h+='<div onclick="pickBrand(this,\''+bs[i].replace(/'/g,"\\'")+'\')">'+bs[i]+'</div>';$('brands').innerHTML='<div onclick="pickAll(this)">Все</div>'+h;fillSel($('f_cat'),dvals(function(p){return p.category;}));fillSel($('f_brand'),dvals(function(p){return p.brand;}));fillSel($('s_car'),bs);renderGarage();render();});
+function fetchWithRetry(u,n){n=n||0;return fetch(u).catch(function(e){if(n<2){return new Promise(function(res){setTimeout(function(){res(fetchWithRetry(u,n+1));},2500);});}toast('⚠️ Не удалось загрузить каталог — обновите страницу');throw e;});}
+fetchWithRetry('/api/products?limit=1000&tenant='+TENANT).then(function(r){return r.json();}).then(function(a){PRODS=a.items||a;var bs=dvals(function(p){return p.car_brand;});var h='';for(var i=0;i<bs.length;i++)h+='<div onclick="pickBrand(this,\''+bs[i].replace(/'/g,"\\'")+'\')">'+bs[i]+'</div>';$('brands').innerHTML='<div onclick="pickAll(this)">Все</div>'+h;fillSel($('f_cat'),dvals(function(p){return p.category;}));fillSel($('f_brand'),dvals(function(p){return p.brand;}));fillSel($('s_car'),bs);renderGarage();render();var pq=new URLSearchParams(location.search).get('p');var hm=location.hash.match(/#p(\d+)/);var pid=pq?+pq:(hm?+hm[1]:0);if(pid){var b4=cur;try{openP(pid);}catch(e){var L=((e.stack||'').split('\n')[1]||'').trim();toast('⚠️ '+(document.getElementById('m_photo')?'':'НЕТ m_photo; ')+(document.getElementById('m_chips')?'':'НЕТ m_chips; ')+(document.getElementById('m_badge')?'':'НЕТ m_badge; ')+e.message+' | '+L);}if(cur===b4){toast('⚠️ Товар по ссылке не найден');}}window.addEventListener('hashchange',function(){var m2=location.hash.match(/#p(\d+)/);if(m2){openP(+m2[1]);}});});
 /*sel_hook*/$('s_car').onchange=selModel;
 $('q').oninput=function(){render();};
 $('f_stock').onchange=render;$('f_brand').onchange=render;$('f_cat').onchange=render;$('f_sort').onchange=render;
 if(window.Telegram)Telegram.WebApp.ready();
 
 function askP(id){openP(id);setTimeout(function(){var b=document.getElementById('ask_box');if(b)b.hidden=false;},100);}
-function sendAsk(){var c=document.getElementById('a_contact').value.trim();if(!c){toast('Укажите контакт');return;}var n=document.getElementById('a_note').value.trim();var b={vin:'',description:'📦 Товар: '+(cur?cur.article+' — '+cur.name:'')+(n?'\n💬 Комментарий: '+n:''),contact:c};fetch('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){if(d.ok){toast('✅ Запрос отправлен владельцу');document.getElementById('ask_box').hidden=true;document.getElementById('a_contact').value='';document.getElementById('a_note').value='';}else{toast('❌ '+(d.error||'Ошибка'));}});}
+function sendAsk(){try{var el=document.getElementById('a_contact');if(!el){toast('⚠️ Форма не готова — обновите страницу');return;}var c=el.value.trim();var dg=c.replace(/\D/g,'');if(!c){toast('⚠️ Укажите контакт');return;}if(dg.length<10){toast('⚠️ Введите телефон полностью');return;}var d0=(dg.length===11&&(dg.charAt(0)==='7'||dg.charAt(0)==='8'))?dg.slice(1):dg;if(d0.length===10){c='+7 ('+d0.slice(0,3)+') '+d0.slice(3,6)+'-'+d0.slice(6,8)+'-'+d0.slice(8,10);}var n=document.getElementById('a_note').value.trim();var tg=document.getElementById('a_tg')?document.getElementById('a_tg').value.trim():'';if(tg&&!/^@[a-zA-Z0-9_]{3,32}$/.test(tg)){toast('⚠ Telegram: @username — латиница, цифры, _ (3-32 после @); ввод с русской раскладки транслитерируется сам');return;}var b={vin:'',description:'📦 Товар: '+(cur?cur.article+' — '+cur.name:'')+(n?'\n💬 Комментарий: '+n:'')+(tg?'\n\u2709\uFE0F TG: '+tg:''),contact:c};askBusy(true);fetch('/api/requests?tenant='+TENANT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){askBusy(false);if(d.ok){toast(d.push_status==='failed'?'⚠️ Заявка сохранена, но пуш не доставлен — владелец увидит её в админке':'✅ Запрос отправлен владельцу');document.getElementById('ask_box').hidden=true;document.getElementById('a_contact').value='';document.getElementById('a_note').value='';}else{toast('❌ '+(d.error||'Ошибка'));}});}catch(e){askBusy(false);toast('⚠️ Ошибка отправки: '+e.message);}}
 
 /*op_wrap*/var _op=window.openP;window.openP=function(id){_op(id);var p=null;for(var i=0;i<PRODS.length;i++)if(PRODS[i].id===id)p=PRODS[i];var md=document.getElementById('m_desc');if(md){md.textContent=(p&&p.description)||'';md.style.display=(p&&p.description)?'block':'none';}};
 

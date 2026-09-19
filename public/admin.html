@@ -227,17 +227,22 @@ function saveBrand(){var c=window._cfg||{};var b={shop_name:document.getElementB
 if(PASS)loadBrand();
 var DEMO=location.search.indexOf('demo=1')>=0;
 if(DEMO){
-var _f=window.fetch;window.fetch=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['x-demo']='1';return _f(u,o);};
-document.body.insertAdjacentHTML('afterbegin','<div style="background:#e6a000;color:#fff;text-align:center;padding:8px;font-weight:700;position:sticky;top:0;z-index:99">🔒 Демо-режим (просмотр). Полный доступ — по паролю.</div>');
+var _origFetch=window.fetch;window._snap=null;
+function loadSnap(){if(window._snap)return Promise.resolve(window._snap);return Promise.all([_origFetch.call(window,'/api/products?tenant=demo&limit=9999',{headers:{'Content-Type':'application/json'}}),_origFetch.call(window,'/api/config?tenant=demo',{headers:{'Content-Type':'application/json'}})]).then(function(rr){return Promise.all([rr[0].json(),rr[1].json()]);}).then(function(j){var prods=(j[0].items)||[];window._snap={products:prods,cfg:j[1],nextId:Math.max.apply(null,[0].concat(prods.map(function(x){return x.id;})))+1};return window._snap;});}
+window.fetch=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['x-demo']='1';var m=(o.method||'GET').toUpperCase();var us=String(u);
+if(m!=='GET'&&us.indexOf('/admin/')>=0){var body=o.body;loadSnap().then(function(s){var b=null;try{b=body?JSON.parse(body):null;}catch(e){}
+if(m==='POST'&&us.indexOf('/admin/products')>=0&&us.indexOf('import')<0){b=b||{};b.id=s.nextId++;s.products.push(b);}
+else if(m==='PUT'&&/\/admin\/products\/\d+/.test(us)){var pid=parseInt(us.split('/').pop(),10);for(var i=0;i<s.products.length;i++){if(s.products[i].id===pid){Object.assign(s.products[i],b||{});break;}}}
+else if(m==='DELETE'&&/\/admin\/products\/\d+/.test(us)){var did=parseInt(us.split('/').pop(),10);s.products=s.products.filter(function(x){return x.id!==did;});}
+else if((m==='POST'&&us.indexOf('/admin/settings')>=0)||(m==='POST'&&us.indexOf('/admin/config')>=0)){if(b&&s.cfg){for(var k in b){s.cfg[k]=b[k];}}}
+if(window.ztoast)ztoast('\u2705 \u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u043e (\u0441\u0438\u043c\u0443\u043b\u044f\u0442\u043e\u0440)');
+if(window.loadP)loadP();if(window.loadR)loadR();if(window.loadBrand)loadBrand();});return Promise.resolve(new Response(JSON.stringify({ok:true}),{status:200,headers:{'Content-Type':'application/json'}}));}
+if(m==='GET'&&us.indexOf('/admin/products')>=0&&us.indexOf('import')<0){return loadSnap().then(function(s){return new Response(JSON.stringify({items:s.products}),{status:200,headers:{'Content-Type':'application/json'}});});}
+if(m==='GET'&&us.indexOf('/admin/config')>=0){return loadSnap().then(function(s){return new Response(JSON.stringify(s.cfg),{status:200,headers:{'Content-Type':'application/json'}});});}
+return _origFetch.call(window,u,o);};
+document.body.insertAdjacentHTML('afterbegin','<div style="background:#f59e0b;color:#1a202c;text-align:center;padding:8px;font-weight:700;position:sticky;top:0;z-index:9999">\u26a1 \u0421\u0438\u043c\u0443\u043b\u044f\u0442\u043e\u0440 \u043c\u0430\u0433\u0430\u0437\u0438\u043d\u0430: \u0432\u0441\u0451 \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442, \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0436\u0438\u0432\u0443\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0432 \u0432\u0430\u0448\u0435\u043c \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0435 \u0434\u043e \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u044f \u0432\u043a\u043b\u0430\u0434\u043a\u0438</div>');
 setTimeout(function(){show();},300);
-setTimeout(function(){document.querySelectorAll('button,input,textarea').forEach(function(el){var t=((el.textContent||'')+(el.placeholder||''));if(/Сохранить|Удалить|Импорт|Отменить|Восстановить|Сбросить|Новый пароль/i.test(t))el.disabled=true;});},1200);
 }
-
-if(DEMO){
-document.addEventListener('click',function(e){var el=e.target.closest?e.target.closest('button'):null;if(el&&/Сохранить|Удалить|Импорт|Отменить|Восстановить|Сбросить/.test(el.textContent||'')){e.preventDefault();e.stopPropagation();alert('🔒 Демо-режим: изменения отключены');}},true);
-setInterval(function(){document.querySelectorAll('button').forEach(function(el){if(/Сохранить|Удалить|Импорт|Отменить|Восстановить|Сбросить/.test(el.textContent||'')){el.disabled=true;el.style.opacity=0.5;}});},2000);
-}
-
 function prepPhoto(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var k=Math.min(1,900/Math.max(img.width,img.height));var c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(bl){var fd=new FormData();fd.append('photo',bl,'photo.jpg');fetch('/admin/upload',{method:'POST',headers:{'x-admin-pass':PASS},body:fd}).then(function(r){return r.json();}).then(function(d){if(d.url){document.getElementById('f_photo_url').value=d.url;var pv=document.getElementById('f_prev');pv.src=d.url;pv.hidden=false;ztoast('📷 Фото загружено и сжато');}else{alert(d.error||'Ошибка фото');}});},'image/jpeg',0.78);};img.src=e.target.result;};r.readAsDataURL(f);}
 function refreshProds(cb){fetch('/admin/products',{headers:{'x-admin-pass':PASS}}).then(function(r){return r.json();}).then(function(d){window._prods=d.items||d;if(cb)cb();});}
 var _ep=window.editProd;window.editProd=function(id){_ep(id);refreshProds(function(){var p=null;(window._prods||[]).forEach(function(x){if(x.id===id)p=x;});var pv=document.getElementById('f_prev');if(p&&p.photo_url){document.getElementById('f_photo_url').value=p.photo_url;pv.src=p.photo_url;pv.hidden=false;}else{document.getElementById('f_photo_url').value='';pv.hidden=true;}});};

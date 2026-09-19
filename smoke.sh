@@ -1,4 +1,8 @@
-#!/bin/sh
-curl -sf http://127.0.0.1:3000/health >/dev/null && echo HEALTH_OK || echo HEALTH_FAIL
-curl -sf "http://127.0.0.1:3000/api/products?limit=1" >/dev/null && echo API_OK || echo API_FAIL
-docker exec zap_app node -e "require('/app/src/db');console.log('DB_OK')" || echo DB_FAIL
+#!/bin/bash
+df -h / | tail -1
+U=$(df -h / | tail -1 | awk '{print $5}' | tr -d '%')
+if [ "$U" -ge 90 ]; then echo DISK_CRITICAL; else echo DISK_OK; fi
+curl -s -m 10 -o /dev/null -w 'health=%{http_code}\n' https://zap.prostors.ru/health
+curl -s -m 10 -o /dev/null -w 'prostors=%{http_code}\n' https://prostors.ru
+curl -s -m 10 -o /dev/null -w 'app=%{http_code}\n' https://app.prostors.ru
+curl -s -m 10 -o /dev/null -w 'ernest=%{http_code}\n' https://ernest.prostors.ru

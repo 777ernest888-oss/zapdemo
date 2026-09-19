@@ -7,9 +7,9 @@
 <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--primary:#667eea;--accent:#764ba2}
-body{margin:0;font-family:system-ui;background:#f5f5f5}
-.hero{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;text-align:center;padding:12px 10px}
-.hero img{width:94%;max-width:430px;height:auto;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+body{margin:0;font-family:system-ui;background:linear-gradient(180deg,var(--primary),var(--accent)) fixed}
+.hero{background:none;color:#fff;text-align:center;padding:12px 10px}
+.hero img{width:94%;max-width:430px;aspect-ratio:4/5;object-fit:cover;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
 .hero h1{font-size:clamp(18px,5.5vw,24px);margin:10px 0 6px}
 .hero p{margin:4px 0 10px;font-size:clamp(12px,3.5vw,15px);opacity:.9}
 .ft{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:460px;margin:0 auto}
@@ -19,26 +19,31 @@ body{margin:0;font-family:system-ui;background:#f5f5f5}
 </head>
 <body>
 <div class="hero">
-<img id="hero_img" src="images/hero.jpg" alt="">
+<img id="hero_img" alt="" style="display:none">
 <h1 id="shop_name">Автозапчасти</h1>
 <p id="slogan"></p>
-<div class="ft">
-<div>📦 В наличии и под заказ</div>
-<div>🔍 Поиск по артикулу и VIN</div>
-<div>✅ Гарантия</div>
-<div>💰 Низкие цены</div>
+<div class="ft" id="ft"></div>
 </div>
-</div>
-<a class="cta" href="catalog.html?v=12">Начать поиск</a>
+<a class="cta" id="cta_shop" href="catalog.html?v=16">Смотреть демо-версию<br>интернет-магазина Автозапчастей</a>
+<a class="cta" id="cta_reg" style="background:#22c55e" href="register.html?v=2">Создать свой<br>интернет-магазин Автозапчастей</a>
 <script>
-fetch('/api/config').then(function(r){return r.json();}).then(function(c){
-if(c.shop_name){document.getElementById('shop_name').textContent=c.shop_name;document.title=c.shop_name;}
+var TENANT=new URLSearchParams(location.search).get("tenant")||"demo";
+function tilesFor(n){n=String(n||'').toLowerCase();
+if(n.indexOf('масл')>=0||n.indexOf('фильтр')>=0)return['📦 В наличии и под заказ','🔍 Поиск по артикулу','✅ Оригиналы и заменители','💰 Цены от поставщиков'];
+if(n.indexOf('разбор')>=0||n.indexOf('контракт')>=0)return['🔧 Контрактные детали','✅ Проверка перед отправкой','📦 Подбор по VIN','💰 Честные цены'];
+return['📦 В наличии и под заказ','🔍 Поиск по артикулу и VIN','✅ Гарантия','💰 Низкие цены'];}
+fetch('/api/config?tenant='+TENANT).then(function(r){return r.json();}).then(function(c){
+if(c.shop_name){document.getElementById('shop_name').textContent='Интернет-магазин «'+c.shop_name+'»';document.title=c.shop_name;}
 if(c.slogan)document.getElementById('slogan').textContent=c.slogan;
-if(c.hero_url)document.getElementById('hero_img').src=c.hero_url;
+var im=document.getElementById('hero_img');im.src=c.hero_url||'/uploads/1788630373229-hero.jpg';im.style.display='';
 if(c.color_primary)document.documentElement.style.setProperty('--primary',c.color_primary);
 if(c.color_accent)document.documentElement.style.setProperty('--accent',c.color_accent);
+var ft=document.getElementById('ft');
+if(TENANT==='demo'){ft.style.display='none';document.getElementById('cta_shop').innerHTML='Смотреть демо-версию<br>интернет-магазина Автозапчастей';}
+else{document.getElementById('cta_reg').style.display='none';document.getElementById('cta_shop').textContent='Смотреть товары';var t=tilesFor(c.shop_name||c.brand_name);ft.innerHTML=t.map(function(x){return '<div>'+x+'</div>';}).join('');}
 });
 if(window.Telegram)Telegram.WebApp.ready();
+document.getElementById('cta_shop').href+='&tenant='+TENANT;
 </script>
 </body>
 </html>

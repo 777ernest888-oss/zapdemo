@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Открой свой магазин автозапчастей</title>
+<style>
+body{margin:0;font-family:system-ui;background:#f5f6fa;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.box{background:#fff;border-radius:16px;padding:24px;max-width:380px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+h1{font-size:19px;margin:0 0 6px}
+p{color:#666;font-size:13px;margin:0 0 14px}
+input{width:100%;box-sizing:border-box;padding:11px;margin:5px 0;border:1px solid #ddd;border-radius:10px;font-size:14px}
+button{width:100%;padding:13px;margin-top:10px;border:none;border-radius:12px;background:#667eea;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.ok{display:none;text-align:center}
+.ok a{display:block;margin:6px 0;color:#667eea;font-weight:600;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="box">
+<div id="frm">
+<h1>🚗 Твой магазин автозапчастей — за 1 минуту</h1>
+<p>14 дней бесплатно, без карты. Загрузишь Excel-прайс — магазин работает.</p>
+<input id="r_name" placeholder="Название магазина">
+<input id="r_phone" placeholder="Мобильный телефон" type="tel" inputmode="numeric">
+<input id="r_tg" placeholder="Ваш Telegram (необязательно)">
+<input id="r_pass" type="password" placeholder="Пароль админки (мин 8 символов)">
+<button id="r_btn" onclick="go()" disabled style="opacity:.5">Создать магазин</button>
+</div>
+<div id="ok" class="ok">
+<h1>✅ Магазин создан!</h1>
+<p>Сохрани ссылки и пароль.</p>
+<a id="l_admin" target="_blank">Админка</a>
+<a id="l_shop" target="_blank">Твоя витрина</a>
+<p>Дальше: войди в админку и загрузи Excel-прайс.</p>
+</div>
+</div>
+<script>
+function maskPhone(el){var d=el.value.replace(/\D/g,'');if(d.charAt(0)==='7'||d.charAt(0)==='8')d=d.slice(1);d=d.slice(0,10);var o='';if(d.length){o='+7 ('+d.slice(0,3);if(d.length>3)o+=') '+d.slice(3,6);if(d.length>6)o+='-'+d.slice(6,8);if(d.length>8)o+='-'+d.slice(8,10);}el.value=o;return d.length===10;}
+document.getElementById('r_phone').addEventListener('input',function(e){var ok=maskPhone(e.target);var b=document.getElementById('r_btn');b.disabled=!ok;b.style.opacity=ok?'1':'.5';});
+document.getElementById('r_tg').addEventListener('input',function(e){var v=e.target.value;if(v&&v.charAt(0)!=='@')e.target.value='@'+v.replace(/^@+/,'').replace(/[^@A-Za-z0-9_]/g,'');});
+function go(){
+var b={name:document.getElementById('r_name').value,phone:document.getElementById('r_phone').value,tg:document.getElementById('r_tg').value,password:document.getElementById('r_pass').value};
+fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
+if(!d.ok){alert(d.error||'Ошибка');return;}
+document.getElementById('frm').style.display='none';
+document.getElementById('ok').style.display='block';
+document.getElementById('l_admin').href=d.admin;
+document.getElementById('l_shop').href=d.shop;
+});
+}
+</script>
+</body>
+</html>
