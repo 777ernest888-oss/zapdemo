@@ -66,7 +66,7 @@ const stock = (b.stock === null || b.stock === '' || isNaN(Number(b.stock))) ? 0
 const tid = req.tid === '*' ? 1 : req.tid;
 function genDesc(b){var n=String(b.name||'').trim();var br=String(b.brand||'').trim();var ar=String(b.article||'').trim();var cb=String(b.car_brand||'').trim();var md=String(b.model||'').trim();var st=b.stock||0;var u=(cb&&cb!=='Универсальный')?' Применяемость: '+cb+(md?' '+md:'')+'.':' Универсальное применение.';return n+(br?' '+br:'')+(ar?' (арт. '+ar+')':'')+'.'+u+' В наличии: '+st+' шт., отгрузка сегодня. Характеристики: бренд — '+(br||'н/д')+'; артикул — '+(ar||'н/д')+'; категория — '+String(b.category||'н/д')+'.';}
 function gphoto(name,cat,cond){if(cond==='used')return null;if(cat&&String(cat).indexOf('Разборка')===0)return null;var m={'Фильтры':'/uploads/stock-filters1.png','Моторные масла':'/uploads/stock-oil1.png','Тормозная система':'/uploads/stock-brake1.png','Подвеска':'/uploads/stock-susp1.png','Электрика':'/uploads/stock-spark1.png','Охлаждение':'/uploads/stock-rad1.png','Трансмиссия':'/uploads/stock-clutch1.png'};if(cat&&m[cat])return m[cat];return null;}
-const r = db.prepare('INSERT INTO products (tenant_id, article, name, category, brand, price, stock, car_brand, model, photo_url, description, condition, country) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)').run(tid, (String(b.article).trim()||('ART-'+Date.now().toString(36).toUpperCase())), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, b.car_brand || null, b.model || null, (b.photo_url||gphoto(b.name,b.category,b.condition)), ((b.description&&b.description.trim())||genDesc(b)), (b.condition||'new'), (b.country||null));
+const r = db.prepare('INSERT INTO products (tenant_id, article, name, category, brand, price, stock, avail, car_brand, model, photo_url, description, condition, country) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(tid, (String(b.article).trim()||('ART-'+Date.now().toString(36).toUpperCase())), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, (b.avail||null), b.car_brand || null, b.model || null, (b.photo_url||gphoto(b.name,b.category,b.condition)), ((b.description&&b.description.trim())||genDesc(b)), (b.condition||'new'), (b.country||null));
 res.json({ ok: true, id: r.lastInsertRowid });
 } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -75,8 +75,8 @@ try {
 const b = req.body;
 const stock = (b.stock === null || b.stock === '' || isNaN(Number(b.stock))) ? 0 : Number(b.stock);
 const tid = req.tid === '*' ? null : req.tid;
-let sql = 'UPDATE products SET article=?, name=?, category=?, brand=?, price=?, stock=?, car_brand=?, model=?, photo_url=?, description=?, condition=?, country=? WHERE id=?';
-let params = [String(b.article).trim(), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, b.car_brand || null, b.model || null, (b.photo_url||gphoto(b.name,b.category,b.condition)), ((b.description&&b.description.trim())||genDesc(b)), (b.condition||'new'), (b.country||null), Number(req.params.id)];
+let sql = 'UPDATE products SET article=?, name=?, category=?, brand=?, price=?, stock=?, avail=?, car_brand=?, model=?, photo_url=?, description=?, condition=?, country=? WHERE id=?';
+let params = [String(b.article).trim(), String(b.name).trim(), b.category || null, b.brand || null, Number(b.price), stock, (b.avail||null), b.car_brand || null, b.model || null, (b.photo_url||gphoto(b.name,b.category,b.condition)), ((b.description&&b.description.trim())||genDesc(b)), (b.condition||'new'), (b.country||null), Number(req.params.id)];
 if (tid !== null) { sql += ' AND tenant_id=?'; params.push(tid); }
 const r = db.prepare(sql).run(...params);
 res.json({ ok: true, changed: r.changes });

@@ -157,7 +157,7 @@ function $(i){return document.getElementById(i);}
 function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
 function emo(c){var m={'Масла':'🛢️','Фильтры':'🌀','Тормоза':'🛑','Подвеска':'🔩','Электрика':'⚡','Кузов':'🚗'};return m[c]||'📦';}
 function fits(p){for(var i=0;i<GAR.length;i++)if(GAR[i].brand===p.car_brand&&GAR[i].model===p.model)return true;return false;}
-function badge(p){var h=p.stock>0?'<span class="badge b-in">В наличии</span>':'<span class="badge b-out">Под заказ (3–5 дн.)</span>';if(fits(p))h+='<span class="badge b-fit">✓ Подойдёт</span>';return h;}
+function badge(p){var av=p.avail||(p.stock>0?'in':'out');var h=av==='in'?'<span class="badge b-in">В наличии</span>':'<span class="badge b-out">Под заказ (3-5 дн.)</span>';if(fits(p))h+='<span class="badge b-fit">✓ Подойдёт</span>';return h;}
 function photoHtml(p){return p.photo_url?'<img class="photo" src="'+p.photo_url+'" alt="">':'<div class="photo">'+emo(p.category)+'</div>';}
 function card(p){return '<div class="card" onclick="openP('+p.id+')">'+photoHtml(p)+'<div class="cbody"><div class="name">'+p.name+'</div><div class="art">'+p.article+(p.car_brand?' · '+p.car_brand+' '+ (p.model||''):'')+'</div><div class="brow">'+badge(p)+(p.condition==='used'?'<span class="ub">Б/у</span>':'')+(p.country?'<span class="cb">🌍 '+p.country+'</span>':'')+'</div><div class="cfoot"><span class="price">'+p.price+' ₽</span></div></div></div>';}
 function tab(t,btn){var s=document.querySelectorAll('section');for(var i=0;i<s.length;i++)s[i].hidden=true;$('t-'+t).hidden=false;var b=document.querySelectorAll('.tabs button');for(var i=0;i<b.length;i++)b[i].className='';btn.className='on';}

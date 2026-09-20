@@ -51,8 +51,8 @@ if (!p) return res.json([]);
 const cr = db.prepare('SELECT cross_numbers FROM products WHERE id=? AND tenant_id=?').get(req.params.id, t);
 const arts = (cr && cr.cross_numbers) ? cr.cross_numbers.split(/[;,;\s]+/).map(function(x){return x.trim();}).filter(Boolean) : [];
 let list = [];
-if (arts.length) { list = db.prepare('SELECT id, article, name, price, stock, brand, photo_url FROM products WHERE tenant_id=? AND article IN (' + arts.map(function(){return '?';}).join(',') + ') AND id!=? AND stock>0').all(...[t].concat(arts, [req.params.id])); }
-const fb = db.prepare('SELECT id, article, name, price, stock, brand, photo_url FROM products WHERE id!=? AND tenant_id=? AND stock>0 AND car_brand IS ? AND model IS ? ORDER BY price ASC LIMIT 200').all(req.params.id, t, p.car_brand, p.model);
+if (arts.length) { list = db.prepare('SELECT id, article, name, price, stock, avail, brand, photo_url FROM products WHERE tenant_id=? AND article IN (' + arts.map(function(){return '?';}).join(',') + ') AND id!=? AND stock>0').all(...[t].concat(arts, [req.params.id])); }
+const fb = db.prepare('SELECT id, article, name, price, stock, avail, brand, photo_url FROM products WHERE id!=? AND tenant_id=? AND stock>0 AND car_brand IS ? AND model IS ? ORDER BY price ASC LIMIT 200').all(req.params.id, t, p.car_brand, p.model);
 const seen = {}; const out = [];
 list.concat(fb.filter(function(x){return agr(x.name)===agr(p.name);})).forEach(function(x){ if (!seen[x.id]) { seen[x.id] = 1; out.push(x); } });
 res.json(out.slice(0, 6));

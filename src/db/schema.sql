@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS products (
     brand TEXT,
     price REAL NOT NULL,
     stock INTEGER NOT NULL DEFAULT 0,
+    avail TEXT,
     photo_url TEXT, country TEXT,
     car_brand TEXT,
     model TEXT,
