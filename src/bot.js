@@ -1,6 +1,8 @@
 if(!process.env.BOT_TOKEN){console.log('BOT SKIP: no token');}else{(function(){
 const {Telegraf,Markup}=require('telegraf');
 const Database=require('better-sqlite3');
+const fs = require('fs');
+const path = require('path');
 const db=new Database(process.env.DB_PATH||'/app/data/parts.db');
 db.exec("CREATE TABLE IF NOT EXISTS outreach(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT UNIQUE, status TEXT DEFAULT 'not_started', phone_type TEXT DEFAULT 'mobile', source TEXT, campaign TEXT, segment TEXT, note TEXT, created_at TEXT DEFAULT (datetime('now')), last_touch TEXT)");
 const TEXT_A='Здравствуйте!\nВижу, что вы профессионально занимаетесь продажей запчастей для авто.\nМы готовы за один день запустить для вас работающий интернет-магазин в Telegram и вебе.\nИнтеграция с вашей базой и сайтом. Всё настроим под ваш бренд сами: загрузим прайс из Excel, подключим уведомления.\nЦена: 2490 ₽/мес.\n\nСкиньте ваш прайс-лист в ответном сообщении — я настрою и бесплатно покажу демо магазина прямо на ваших деталях!';
@@ -22,6 +24,22 @@ bot.command('stats',function(ctx){if(!auth(ctx))return ctx.reply('нет дос�
 bot.command('who',c=>{if(!auth(c))return c.reply('нет доступа');var s=(c.message.text||'').split(/\s+/)[1];if(ST.indexOf(s)<0)return c.reply('/who <статус>: '+ST.join('|'));var r=db.prepare('SELECT name,phone FROM outreach WHERE status=? ORDER BY id LIMIT 20').all(s);return c.reply(r.length?s+' ('+r.length+'):\n'+r.map(function(x){return (x.name||'—')+' '+x.phone;}).join('\n'):s+': пусто.');});
 bot.catch(e=>console.log('BOT CATCH',e.message));
 var first=true;
+
+bot.command('backup', async c => {
+  if (!auth(c)) return c.reply('нет доступа');
+  const dir = '/app/backups'; // Путь внутри контейнера (mount /root/zapdemo/backups:/app/backups:ro)
+  try {
+    const files = fs.readdirSync(dir).filter(f => f.endsWith('.tar.gz.enc')).sort();
+    if (!files.length) return c.reply('Нет .enc файлов в backups');
+    const latest = files[files.length - 1];
+    const fullpath = path.join(dir, latest);
+    await c.replyWithDocument({ source: fullpath }, { caption: '\ud83d\udd12 Offsite Backup\n' + latest + '\nКлюч: BACKUP_KEY в .env' });
+  } catch(e) {
+    console.error('[BACKUP_CMD]', e);
+    c.reply('Ошибка чтения бэкапа: ' + e.message);
+  }
+});
+
 bot.command('links',c=>{if(!auth(c))return c.reply('Нет доступа');return c.reply('Адреса — тапни:',Markup.inlineKeyboard([[Markup.button.url('Админка','https://zap.prostors.ru/admin.html?tenant=demo')],[Markup.button.url('Каталог','https://zap.prostors.ru/catalog.html?tenant=demo')],[Markup.button.url('Лендинг','https://zap.prostors.ru/?tenant=demo')],[Markup.button.url('Health (жив ли сервер)','https://zap.prostors.ru/health')]]));});
 function start(){var d=first;first=false;bot.launch({dropPendingUpdates:d}).then(()=>console.log('BOT STOPPED')).catch(function(e){console.log('BOT ERR',e.message);setTimeout(start,5000);});}
 console.log('BOT LAUNCH CALLED');
