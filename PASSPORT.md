@@ -1174,3 +1174,25 @@ PASSPORT.md — единственный источник истины по пр
 20.3 Процесс: grep-факты якорей → python-патч с assert → синтакс-проверка (docker node --check / экстракт script) → gt (/tmp/mk.py + кейсы) → деплой тремя блоками → приёмка владельца → тег last_good_frontend → дельта в паспорт.
 20.4 Ключевые запреты: якоря по памяти; патчи без assert; двойной прогон патча; RegExp-строки без двойного экранирования; NBSP не вычистить (sed 's/\xc2\xa0/ /g' по скрипту).
 20.5 Где что: бэкапы /root/zapdemo/backups (crontab -l), логи docker logs zap_app, репо github, исторические срезы src/routes/*.bak, gt-кейсы пересоздаются /tmp/mk.py.
+
+<!-- DELTA44 -->
+§44. ДЕЛЬТА 21.09.2026 — offsite backup через Telegram-бота (риск §17.5 закрыт)
+
+Решение владельца (вариант б из §33): шифрование AES-256-CBC + доставка документа владельцу командой /backup в @zapdemo777bot.
+
+Реализация:
+1. .env: добавлена переменная BACKUP_KEY=<openssl rand -hex 32> (секрет, не в git).
+2. backup_zap.sh переписан: tar → openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt → rm plaintext → ротация *.tar.gz.enc (mtime+7). Plaintext-архивы удаляются сразу после шифрования.
+3. src/bot.js: добавлены require('fs')/require('path'); новая команда bot.command('backup'): auth(c) → readdirSync('/app/backups').filter(.tar.gz.enc).sort() → replyWithDocument(latest) с caption «🔒 Offsite Backup\n<filename>\nКлюч: BACKUP_KEY в .env».
+4. Контейнер запускается с дополнительным mount: -v /root/zapdemo/backups:/app/backups:ro (read-only, безопасность от записи ботом).
+
+Проверки: SYNTAX_OK (docker node --check); BUILD_OK; DEPLOY_DONE; ZAP_HEALTH:200; PROSTORS_MAIN:200 (K22); GIT_PUSHED e8d887e; приёмка владельца скриншотом TG (документ получен 12:11, размер 3,3 МБ).
+
+Инструкция восстановления вне сервера: скачать файл из чата бота → openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in <file>.enc -out restored.tar.gz -pass pass:<BACKUP_KEY> → tar -xzf restored.tar.gz -C /root/zapdemo/data/.
+
+Урок K38: перед патчем JS-модуля проверять grep фактических require в шапке файла; предыдущий провал fs is not defined произошёл из-за ложного предположения о наличии импорта. Правило: факты до диагноза распространяются и на наличие модулей.
+
+Текущее состояние: риск потери данных при гибели VPS устранён (еженедельный ручной /backup по запросу владельца; автоматический cron-пуш воскресенье 10:00 — очередь v2).
+
+Команда деплоя: docker build → stop/rm/run (+mount backups ro) → nginx reload → smoke 4×200 → commit/push → тег last_good_frontend.
+<!-- /DELTA44 -->
