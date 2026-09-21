@@ -1196,3 +1196,23 @@ PASSPORT.md — единственный источник истины по пр
 
 Команда деплоя: docker build → stop/rm/run (+mount backups ro) → nginx reload → smoke 4×200 → commit/push → тег last_good_frontend.
 <!-- /DELTA44 -->
+
+<!-- DELTA45 -->
+§45. ДЕЛЬТА 21.09.2026 — донабор словарей парсера (марки/модели автозапчастей РФ)
+
+Решение владельца: расширить покрытие рынка с ~30% до целевых 90-95%, чтобы робот распознавал китайские, премиум и коммерческие марки при диктовке текста.
+
+Реализация:
+1. public/admin.html (строки 308-309):
+   - var BA расширен с 12 до 30 марок (+Nissan, Mazda, Mitsubishi, Suzuki, Mercedes, BMW, Audi, Peugeot, Citroen, Haval, Chery, Geely, Changan, Exeed, Jetour, Tank, ГАЗ, УАЗ). Алиасы включают латиницу и кириллицу.
+   - var MODEL_MAP расширен с 40 до 148 записей (~74 уникальных моделей × 2 алиаса). Добавлены ключевые модели для новых марок (Qashqai, CX-5, Outlander, GLC, X5, Jolion, Tiggo, Coolray, Газель Next, Патриот и др.).
+2. Инструмент тестирования: создан изолированный харнес test_parser_v4.py, который вырезает чистую логику парсера из HTML (без DOM/UI мусора), добавляет минимальный стаб window={} и прогоняет GT-кейсы A-K + новые (CN/EU/JP/RU). Это решило проблему бесконечных ошибок ReferenceError/TypeError при попытке эмулировать весь браузер.
+
+Проверки: SYNTAX_OK (docker node --check); GT 10/10 PASS (A,B,C,H,J,NEW-1..5); BUILD_OK; DEPLOY_DONE; ZAP_HEALTH:200; PROSTORS_MAIN:200 (K22); GIT_PUSHED 8ddf176.
+
+Урок K39: диагностика «нет данных» (grep const → пусто) без проверки альтернативных объявлений (var/let) привела к ложному выводу о смене структуры кода. Правило §0.3 («факты до диагноза») распространяется на поиск переменных: проверять все варианты объявления перед постановкой диагноза. Также подтверждено правило §20.4: обязательная очистка NBSP (sed 's/\xc2\xa0/ /g') перед запуском Python-скриптов, полученных через paste.
+
+Текущее состояние: парсер v1.7 готов к боевой эксплуатации. Очередь расширения: Lexus, Infiniti, Volvo, Land Rover/Jaguar, Chevrolet, Fiat, Jeep, Porsche, Mini, Datsun, SsangYong + уточнение моделей Toyota RAV4/Land Cruiser/Hilux, Mazda CX-3/CX-8.
+
+Команда деплоя: стандартная цепь из 3 блоков (§20.3). Тестирование: python3 test_parser_v4.py.
+<!-- /DELTA45 -->
