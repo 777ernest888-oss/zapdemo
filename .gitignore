@@ -4,3 +4,5 @@ node_modules/
 *.bak*
 *.log
 backups/
+patch_*.py
+test_parser*.py
