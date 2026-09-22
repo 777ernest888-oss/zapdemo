@@ -158,9 +158,26 @@ const tid = req.tid === '*' ? 1 : req.tid;
 const planRow = db.prepare('SELECT plan FROM tenants WHERE id=?').get(tid);
 const L = ({ start: { rows: 3000, mb: 5 }, growth: { rows: 15000, mb: 20 }, pro: { rows: 50000, mb: 50 }, enterprise: { rows: 200000, mb: 50 }, trial: { rows: 3000, mb: 5 } })[(planRow && planRow.plan) || 'trial'] || { rows: 2000, mb: 5 };
 if (req.file.size > L.mb * 1024 * 1024) return res.status(400).json({ error: 'file bigger than plan allows' });
-const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
-const ws = wb.Sheets[wb.SheetNames[0]];
-const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+let rows;
+if (String(req.file.originalname||'').toLowerCase().endsWith('.csv')) {
+  let text = req.file.buffer.toString('utf8').replace(/^\uFEFF/,'');
+  const firstLine = text.split('\n')[0];
+  const delim = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
+  const grid = [];
+  let cur = [''], field = '', inQ = false;
+  for (let q = 0; q < text.length; q++) {
+    const ch = text[q];
+    if (inQ) { if (ch === '"') { if (text[q+1] === '"') { field += '"'; q++; } else inQ = false; } else field += ch; }
+    else { if (ch === '"') inQ = true; else if (ch === delim) { cur.push(field); field = ''; } else if (ch === '\n') { cur.push(field); grid.push(cur); cur = ['']; field = ''; } else if (ch === '\r') {} else field += ch; }
+  }
+  if (field !== '' || cur.length > 1) { cur.push(field); grid.push(cur); }
+  const hdr = grid[0].map(h=>h.trim());
+  rows = grid.slice(1).filter(r=>r.some(c=>String(c).trim()!=='')).map(r=>{ const o={}; hdr.forEach((h,k)=>o[h]=String(r[k]||'').trim()); return o; });
+} else {
+  const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+}
 if (rows.length > L.rows) return res.status(400).json({ error: 'rows more than plan allows: ' + L.rows });
 let inserted = 0, updated = 0;
 const errors = [];
@@ -168,10 +185,11 @@ db.exec('BEGIN');
 rows.forEach(function (r, i) {
 const article = String(r.article || '').trim();
 const name = String(r.name || '').trim();
-const price = Number(r.price);
+const price = Number(String(r.price).replace(/\s/g,'').replace(',','.'));
 if (!article) { errors.push({ row: i + 2, error: 'пустой артикул' }); return; }
 if (!name || isNaN(price) || price <= 0) { errors.push({ row: i + 2, error: 'некорректные name/price' }); return; }
-const stock = (r.stock === '' || isNaN(Number(r.stock))) ? 0 : Number(r.stock);
+const stockN = Number(String(r.stock).replace(/\s/g,'').replace(',','.'));
+const stock = (r.stock === '' || isNaN(stockN)) ? 0 : stockN;
 const category = String(r.category || '').trim() || null;
 const brand = String(r.brand || '').trim() || null;
 const car_brand = String(r.car_brand || '').trim() || null;

@@ -10,6 +10,7 @@ const admin = require('./routes/admin');
 const config = require('./routes/config');
 const settings = require('./routes/settings');
 const app = express();
+app.set('trust proxy', true);
 app.use(express.json());
 app.use(function (req, res, next) {
 if (req.path.indexOf('/api/') === 0) {
