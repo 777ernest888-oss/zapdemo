@@ -23,7 +23,7 @@ button{width:100%;padding:13px;margin-top:10px;border:none;border-radius:12px;ba
 <input id="r_name" placeholder="Название магазина">
 <input id="r_phone" placeholder="Мобильный телефон" type="tel" inputmode="numeric">
 <input id="r_tg" placeholder="Ваш Telegram (необязательно)">
-<input id="r_pass" type="password" placeholder="Пароль админки (мин 8 символов)">
+<input id="r_email" type="email" placeholder="Электронная почта (обязательно)" inputmode="email">
 <button id="r_btn" onclick="go()" disabled style="opacity:.5">Создать магазин</button>
 </div>
 <div id="ok" class="ok">
@@ -39,7 +39,7 @@ function maskPhone(el){var d=el.value.replace(/\D/g,'');if(d.charAt(0)==='7'||d.
 document.getElementById('r_phone').addEventListener('input',function(e){var ok=maskPhone(e.target);var b=document.getElementById('r_btn');b.disabled=!ok;b.style.opacity=ok?'1':'.5';});
 document.getElementById('r_tg').addEventListener('input',function(e){var v=e.target.value;if(v&&v.charAt(0)!=='@')e.target.value='@'+v.replace(/^@+/,'').replace(/[^@A-Za-z0-9_]/g,'');});
 function go(){
-var b={name:document.getElementById('r_name').value,phone:document.getElementById('r_phone').value,tg:document.getElementById('r_tg').value,password:document.getElementById('r_pass').value};
+var b={name:document.getElementById('r_name').value,phone:document.getElementById('r_phone').value,tg:document.getElementById('r_tg').value,email:document.getElementById('r_email').value};
 fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
 if(!d.ok){alert(d.error||'Ошибка');return;}
 document.getElementById('frm').style.display='none';

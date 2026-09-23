@@ -11,7 +11,8 @@ function isMaster(q){return crypto.createHash("sha256").update(q).digest("hex")=
 function passValid(pass, tenantId) {
 if (isMaster(pass)) return { ok: true, tid: '*' };
 try {
-const row = db.prepare('SELECT admin_password FROM tenant_config WHERE id=?').get(tenantId);
+const row = db.prepare('SELECT admin_password, admin_password_hash FROM tenant_config WHERE id=?').get(tenantId);
+if (row && row.admin_password_hash && require('bcryptjs').compareSync(pass, row.admin_password_hash)) return { ok: true, tid: tenantId };
 if (row && row.admin_password && pass === row.admin_password) return { ok: true, tid: tenantId };
 } catch (e) {}
 return { ok: false };
@@ -53,7 +54,7 @@ res.json(db.prepare('SELECT * FROM requests WHERE tenant_id=? ORDER BY id DESC L
 router.get('/settings', function (req, res) {
 try {
 const tid = req.tid === '*' ? 1 : req.tid;
-const r = db.prepare('SELECT brand_name, contact_info, phone, about, tg_chat_id, (admin_password IS NOT NULL) AS has_pass FROM tenant_config WHERE id=?').get(tid) || {};
+const r = db.prepare('SELECT brand_name, contact_info, phone, about, tg_chat_id, (admin_password IS NOT NULL OR admin_password_hash IS NOT NULL) AS has_pass FROM tenant_config WHERE id=?').get(tid) || {};
 r.is_master = (req.isMaster || req.tid === '*') ? 1 : 0;
 res.json(r);
 } catch (e) { res.status(500).json({ error: e.message }); }
@@ -179,6 +180,9 @@ if (String(req.file.originalname||'').toLowerCase().endsWith('.csv')) {
   rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
 }
 if (rows.length > L.rows) return res.status(400).json({ error: 'rows more than plan allows: ' + L.rows });
+const ALIAS={article:['article','артикул','арт','артикула','код'],name:['name','наименование','название','товар','позиция'],price:['price','цена','ценаруб','розница'],stock:['stock','остаток','остатки','количество','колво','наличие'],category:['category','категория','группа','раздел'],brand:['brand','бренд','марка','производитель'],car_brand:['car_brand','car','авто','маркаавто'],cross_numbers:['cross_numbers','cross','кроссы','номера','аналоги']};
+function normKey(k){return String(k).toLowerCase().replace(/[^a-zа-я0-9]/gi,'');}
+rows=rows.map(function(r){var o={};Object.keys(r).forEach(function(k){o[normKey(k)]=r[k];});var out={};Object.keys(ALIAS).forEach(function(f){var hit=null;for(var ai=0;ai<ALIAS[f].length;ai++){if(o[ALIAS[f][ai]]!==undefined){hit=o[ALIAS[f][ai]];break;}}out[f]=hit;});return out;});
 let inserted = 0, updated = 0;
 const errors = [];
 db.exec('BEGIN');

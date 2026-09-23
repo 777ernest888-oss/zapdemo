@@ -30,7 +30,7 @@ button.gray{background:#999}
 <h1>⚙️ Админ-панель</h1>
 <div id="login">
 <input id="pass" type="password" placeholder="Пароль администратора">
-<button onclick="doLogin()">Войти</button>
+<button onclick="doLogin()">Войти</button> <button class="gray" onclick="forgotPass()">Забыли пароль?</button>
 <div class="err" id="lerr"></div>
 </div>
 <div id="app" class="hide">
@@ -96,7 +96,8 @@ var PASS=sessionStorage.getItem('apass')||'';
 var editId=null;
 var TID=new URLSearchParams(location.search).get('tenant')||'demo';function hdr(){return {'Content-Type':'application/json','x-admin-pass':PASS,'x-tenant-id':TID};}
 document.getElementById('nav_main').href='index.html?v=37&tenant='+TID;document.getElementById('nav_cat').href='catalog.html?v=37&tenant='+TID;
-function doLogin(){
+function forgotPass(){var em=prompt('Электронная почта, указанная при регистрации:');if(!em)return;fetch('/api/register/forgot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})}).then(function(r){return r.json();}).then(function(){document.getElementById('lerr').textContent='Если почта зарегистрирована, письмо со ссылкой уже отправлено';});}
+function doLogin(){if(window.__RESET){var np=document.getElementById('pass').value.trim();if(np.length<8){document.getElementById('lerr').textContent='Пароль: минимум 8 символов';return;}fetch('/api/register/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:window.__RESET,password:np})}).then(function(r){return r.json();}).then(function(d){if(d.error){document.getElementById('lerr').textContent=d.error;return;}window.__RESET=null;PASS=np;sessionStorage.setItem('apass',np);document.getElementById('lerr').textContent='';checkPass();});return;}
 PASS=document.getElementById('pass').value;
 fetch('/admin/products',{headers:hdr()}).then(function(r){
 if(r.ok){sessionStorage.setItem('apass',PASS);show();}
@@ -389,5 +390,6 @@ aiToast(r.conf>=3?'🤖 Распознано '+r.conf+' из 4 полей — п
 /*collapse_new*/(function(){var h=null;document.querySelectorAll('h2,h3').forEach(function(x){if(x.textContent.indexOf('Новый товар')>=0)h=x;});if(!h)return;var tog=document.createElement('button');tog.style.cssText='margin-left:10px;font-size:12px;padding:6px 12px';h.appendChild(tog);var nodes=[];var el=h.nextElementSibling;while(el&&el.tagName!=='H2'&&el.tagName!=='H3'){nodes.push(el);el=el.nextElementSibling;}var col=true;function apply(){nodes.forEach(function(n){n.style.display=col?'none':'';});tog.textContent=col?'▸ Создать новый товар':'▾ Скрыть форму';}tog.onclick=function(){col=!col;apply();};apply();window._expandNew=function(){col=false;apply();};})();
 function aiToast(m){var t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 16px;border-radius:10px;z-index:999;max-width:90%;text-align:center;display:block';t.textContent=m;clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},4000);}
 </script>
+<script>(function(){var rk=new URLSearchParams(location.search).get('reset');if(rk){window.__RESET=rk;document.addEventListener('DOMContentLoaded',function(){var el=document.getElementById('pass');if(el)el.placeholder='Новый пароль (минимум 8 символов)';var le=document.getElementById('lerr');if(le)le.textContent='Ссылка сброса действительна: задайте новый пароль и нажмите Войти';});}})();</script>
 </body>
 </html>
