@@ -13,7 +13,7 @@ if (!desc || String(desc).trim().length < 2) return res.status(400).json({ error
 const dg0=contact.replace(/\D/g,''); const dgx=(dg0.length===11&&(dg0[0]==='7'||dg0[0]==='8'))?dg0.slice(1):dg0; if(dgx.length!==10) return res.status(400).json({ error: 'Телефон: ровно 11 цифр (+7 XXX XXX-XX-XX)' }); const phone='+7 ('+dgx.slice(0,3)+') '+dgx.slice(3,6)+'-'+dgx.slice(6,8)+'-'+dgx.slice(8,10);
 
 if (vin && !/^[A-Za-z0-9]{6,17}$/.test(String(vin).trim())) return res.status(400).json({ error: 'VIN: 6–17 знаков латиницей и цифрами' });
-const r = db.prepare('INSERT INTO requests (type, vin, description, contact, tenant_id, push_status) VALUES (?, ?, ?, ?, ?, ?)').run('vin', vin || null, dd, phone, t, 'pending');
+return res.status(403).json({ ok:false, message:'Приём запросов отключён' });
 var PFX='📦 Товар: ';var CM='\n💬 Комментарий: ';
 var d=dd;var prod='';var note='';
 if(d.indexOf(PFX)===0){var bb=d.slice(PFX.length);var ni=bb.indexOf(CM);if(ni>=0){prod=bb.slice(0,ni);note=bb.slice(ni+CM.length);}else{prod=bb;}}

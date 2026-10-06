@@ -55,7 +55,7 @@ const dup=all.find(function(t){return (np&&String(t.contact_phone||'').replace(/
 if(dup)return res.status(409).json({error:'Магазин с таким телефоном или Telegram уже создан: '+dup.slug+'. Повторная регистрация не нужна.'});
 const slug = genSlug();
 if (!slug) return res.status(500).json({ error: 'slug gen failed' });
-const r = db.prepare("INSERT INTO tenants (name, slug, status, plan, expires_at, contact_phone, contact_tg, contact_email) VALUES (?,?,?,?,datetime('now','+14 day'),?,?,?)").run(name, slug, 'active', 'trial', phone, tg, email);
+return res.status(403).json({ ok:false, message:'Регистрация через форму отключена; подключение вручную' });
 var th = pickTheme(name);
 db.prepare('INSERT INTO tenant_config (id, brand_name, shop_name, phone, contact_info, admin_password_hash, tg_chat_id, color_primary, color_accent, slogan) VALUES (?,?,?,?,?,?,?,?,?,?)').run(r.lastInsertRowid, name, cleanName(name), phone, tg, null, '0', th.c1, th.c2, th.sl);
 db.prepare("INSERT INTO password_resets (token, tenant_id, expires_at) VALUES (?,?,datetime('now','+24 hour'))").run(tok,r.lastInsertRowid);

@@ -118,12 +118,7 @@ img.photo{object-fit:cover;display:block}
 </div>
 </section>
 <section id="t-vin" hidden>
-<form onsubmit="sendVin(event)">
-<input class="fin" id="v_vin" placeholder="VIN (необязательно)">
-<textarea class="fin" id="v_desc" rows="3" maxlength="100" placeholder="Что нужно? (до 100 знаков)" required></textarea>
-<input class="fin" id="v_contact" placeholder="Телефон: +7 (XXX) XXX-XX-XX" type="tel" inputmode="numeric" required><input class="fin" id="v_tg" maxlength="33" placeholder="Telegram: @username (латиница, необязательно)">
-<button>Отправить запрос</button>
-</form>
+<div style="margin:12px 0"><a href="https://t.me/ernest_812" style="display:inline-block;background:#667eea;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:600">✈ Задать вопрос в Telegram</a></div>
 <div id="vin_msg" class="info"></div>
 </section>
 <section id="t-info" hidden>
@@ -145,7 +140,7 @@ img.photo{object-fit:cover;display:block}
 <div id="m_term" style="font-size:13px;color:#666"></div>
 <div class="desc-toggle" onclick="toggleDesc()" style="display:none"><span>📄 Описание и характеристики</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
 <div id="m_desc" class="desc-content"></div>
-<div><button id="m_ask" class="mbtn" style="border:none;cursor:pointer" onclick="openAsk()">📨 Отправить запрос</button><button class="mbtn" onclick="shareLink()">📤 Поделиться</button></div><div id="ask_box" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:6px"><input id="a_contact" placeholder="+7 (XXX) XXX-XX-XX" type="tel" inputmode="numeric" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_tg" maxlength="33" placeholder="Telegram: @username (латиница, необязательно)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><input id="a_note" maxlength="30" placeholder="Комментарий (до 30 знаков)" style="padding:10px;border:1px solid #d8dce6;border-radius:10px"><button id="ask_btn" class="mbtn" style="border:none;cursor:pointer;opacity:.7" onclick="sendAsk()">Отправить запрос</button></div>
+<div><button class="mbtn" onclick="shareLink()">📤 Поделиться</button></div>
 <h4 id="m_an_title" style="margin:12px 0 4px;display:none">Аналоги</h4>
 <div id="m_an" class="analogs-scroll"></div>
 </div>
